@@ -1,0 +1,16 @@
+Django==3.1.4
+django-admin-tools==0.9.1
+django-admin-tools-stats==0.9.0
+django-bower==5.2.0
+django-celery-beat==2.2.0
+django-celery-results==2.0.1
+django-cors-headers==3.7.0
+django-filter==2.4.0
+django-jsonfield==1.4.1
+django-nvd3==0.9.7
+django-qsstats-magic==1.1.0
+django-templated-mail==1.1.1
+django-timezone-field==4.1.2
+djangorestframework==3.12.4
+djangorestframework-simplejwt==4.4.0
+Pillow==8.3.1
