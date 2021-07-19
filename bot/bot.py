@@ -2,7 +2,7 @@
 import telebot
 from telebot import types
 
-bot = telebot.TeleBot('1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c')
+bot = telebot.TeleBot('*')
 
 
 @bot.message_handler(commands=["geo"])
