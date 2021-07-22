@@ -5,8 +5,7 @@ from aiogram import types
 import requests
 import aiogram.utils.markdown as fmt
 
-bot = telebot.TeleBot('1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c')
-# http://admin:8000
+bot = telebot.TeleBot('*')
 
 
 @bot.message_handler(commands=["start", "back", "drinks"])
