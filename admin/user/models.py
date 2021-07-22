@@ -1,5 +1,5 @@
 from django.db import models
-from index.models import City
+from index.models import City, Game
 
 
 class User(models.Model):
@@ -22,3 +22,18 @@ class User(models.Model):
     class Meta:
         verbose_name = 'Пользователи бота'
         verbose_name_plural = 'Пользователи бота'
+
+
+class Actions(models.Model):
+
+    user = models.OneToOneField(
+        User, on_delete=models.DO_NOTHING, verbose_name="Пользователь")
+    question = models.ForeignKey(
+        Game, default=0, on_delete=models.DO_NOTHING, verbose_name="вопрос")
+
+    def __str__(self):
+        return f'{self.user}'
+
+    class Meta:
+        verbose_name = 'Действие пользователей'
+        verbose_name_plural = 'Действия пользователей'

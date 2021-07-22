@@ -21,6 +21,18 @@ class HumanList(generics.ListCreateAPIView):
     serializer_class = HumanSerializer
 
 
+class HumanArray(generics.ListAPIView):
+    queryset = Human.objects.all()
+    serializer_class = HumanSerializer
+
+    def get(self, request):
+        data = Human.objects.all()
+        arrayOfHumans = []
+        for i in range(0, len(data)):
+            arrayOfHumans.append(data[i].name)
+        return Response(data={"data": arrayOfHumans})
+
+
 class PostsList(generics.ListCreateAPIView):
     queryset = Posts.objects.all()
     serializer_class = PostSerializer
@@ -46,6 +58,7 @@ class PostsGetWithTypes(generics.ListAPIView):
     serializer_class = PostSerializer
 
     def get(self, request, id):
+        print(Posts.objects.filter(timeStart__year='2021'))
         data = Posts.objects.filter(typeOfPost=id)
         serializeData = PostSerializer(data, many=True)
         return Response(data=serializeData.data)

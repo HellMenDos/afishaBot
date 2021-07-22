@@ -1,10 +1,12 @@
 from django.conf.urls import url
 
-from index.views import CityList, PostsList, PostsGetOne, PostsGetWithTypes, PostsGetWithHuman, PostsGetWithTitle, PostsGetWithLocation, PostsGetWithBest, PostsListAll, GameAll, GameOne, GameGetHuman, GameGetQuestion
+from index.views import CityList, PostsList, PostsGetOne, PostsGetWithTypes, PostsGetWithHuman, PostsGetWithTitle, PostsGetWithLocation, PostsGetWithBest, PostsListAll, GameAll, GameOne, GameGetHuman, GameGetQuestion, HumanArray, HumanList, TypeOfPostsList
 
 
 urlpatterns = [
     url('city/get/?$', CityList.as_view()),
+    url('types/get/?$', TypeOfPostsList.as_view()),
+    url('human/array/?$', HumanArray.as_view()),
     url('posts/get/?$', PostsList.as_view()),
     url('posts/all/?$', PostsListAll.as_view()),
     url('post/one/(?P<pk>[0-9]+)/?$', PostsGetOne.as_view()),
