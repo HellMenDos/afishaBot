@@ -1,172 +1,3 @@
-# # from aiogram import Bot, Dispatcher, executor, types
-# import asyncio
-
-# # # Объект бота
-# # bot = Bot(token="1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c")
-# # # Регистрация команд, отображаемых в интерфейсе Telegram
-
-
-# async def set_commands(bot: Bot):
-#     commands = [
-#         types.BotCommand(command="/drinks", description="Заказать напитки"),
-#         types.BotCommand(command="/food", description="Заказать блюда"),
-#         types.BotCommand(command="/cancel",
-#                          description="Отменить текущее действие")
-#     ]
-#     await bot.set_my_commands(commands)
-
-
-# async def main():
-
-#     bot = Bot(token='1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c')
-#     dp = Dispatcher(bot)
-
-#     @dp.message_handler(commands="drinks")
-#     async def cmd_test1(message: types.Message):
-#         await message.reply("Test 1")
-
-#     # Установка команд бота
-#     await set_commands(bot)
-
-#     # Запуск поллинга
-#     # await dp.skip_updates()  # пропуск накопившихся апдейтов (необязательно)
-#     await dp.start_polling()
-
-# if __name__ == '__main__':
-#     asyncio.run(main())
-
-
-# API_TOKEN = '1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c'
-
-
-# bot = Bot(token=API_TOKEN)
-
-# # For example use simple MemoryStorage for Dispatcher.
-# storage = MemoryStorage()
-# dp = Dispatcher(bot, storage=storage)
-
-# # States
-
-
-# class Form(StatesGroup):
-#     name = State()  # Will be represented in storage as 'Form:name'
-#     age = State()  # Will be represented in storage as 'Form:age'
-#     gender = State()  # Will be represented in storage as 'Form:gender'
-
-
-# @dp.message_handler(commands="test4")
-# async def with_hidden_link(message: types.Message):
-#     print(message.chat.id)
-#     await message.answer(
-#         f"{fmt.hide_link('https://www.prikol.ru/wp-content/gallery/november-2011/geirangerfjord-01-big.jpg')}Кто бы мог подумать, что "
-#         f"в 2020 году в Telegram появятся видеозвонки!\n\nОбычные голосовые вызовы "
-#         f"возникли в Telegram лишь в 2017, заметно позже своих конкурентов. А спустя три года, "
-#         f"когда огромное количество людей на планете приучились работать из дома из-за эпидемии "
-#         f"коронавируса, команда Павла Дурова не растерялась и сделала качественные "
-#         f"видеозвонки на WebRTC!\n\nP.S. а ещё ходят слухи про демонстрацию своего экрана :)",
-#         parse_mode=types.ParseMode.HTML)
-
-
-# @dp.message_handler(commands='start')
-# async def cmd_start(message: types.Message):
-#     """
-#     Conversation's entry point
-#     """
-#     # Set state
-#     await Form.name.set()
-
-#     await message.reply("Hi there! What's your name?")
-
-
-# # You can use state '*' if you need to handle all states
-# @dp.message_handler(state='*', commands='cancel')
-# @dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
-# async def cancel_handler(message: types.Message, state: FSMContext):
-#     """
-#     Allow user to cancel any action
-#     """
-#     current_state = await state.get_state()
-#     if current_state is None:
-#         return
-
-#     logging.info('Cancelling state %r', current_state)
-#     # Cancel state and inform user about it
-#     await state.finish()
-#     # And remove keyboard (just in case)
-#     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
-
-
-# @dp.message_handler(state=Form.name)
-# async def process_name(message: types.Message, state: FSMContext):
-#     """
-#     Process user name
-#     """
-#     async with state.proxy() as data:
-#         data['name'] = message.text
-
-#     await message.reply("How old are you?")
-
-
-# # Check age. Age gotta be digit
-# @dp.message_handler(lambda message: not message.text.isdigit(), state=Form.age)
-# async def process_age_invalid(message: types.Message):
-#     """
-#     If age is invalid
-#     """
-#     return await message.reply("Age gotta be a number.\nHow old are you? (digits only)")
-
-
-# @dp.message_handler(lambda message: message.text.isdigit(), state=Form.age)
-# async def process_age(message: types.Message, state: FSMContext):
-#     # Update state and data
-#     await Form.next()
-#     await state.update_data(age=int(message.text))
-
-#     # Configure ReplyKeyboardMarkup
-#     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-#     markup.add("Male", "Female")
-#     markup.add("Other")
-
-#     await message.reply("What is your gender?", reply_markup=markup)
-
-
-# @dp.message_handler(lambda message: message.text not in ["Male", "Female", "Other"], state=Form.gender)
-# async def process_gender_invalid(message: types.Message):
-#     """
-#     In this example gender has to be one of: Male, Female, Other.
-#     """
-#     return await message.reply("Bad gender name. Choose your gender from the keyboard.")
-
-
-# @dp.message_handler(state=Form.gender)
-# async def process_gender(message: types.Message, state: FSMContext):
-#     async with state.proxy() as data:
-#         data['gender'] = message.text
-
-#         # Remove keyboard
-#         markup = types.ReplyKeyboardRemove()
-
-#         # And send message
-#         await bot.send_message(
-#             message.chat.id,
-#             md.text(
-#                 md.text('Hi! Nice to meet you,', md.bold(data['name'])),
-#                 md.text('Age:', md.code(data['age'])),
-#                 md.text('Gender:', data['gender']),
-#                 sep='\n',
-#             ),
-#             reply_markup=markup,
-#             parse_mode=ParseMode.MARKDOWN,
-#         )
-
-#     # Finish conversation
-#     await state.finish()
-
-
-# if __name__ == '__main__':
-#     executor.start_polling(dp, skip_updates=True)
-
-
 import aiogram.utils.markdown as md
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -178,11 +9,16 @@ from aiogram.utils import executor
 import aiogram.utils.markdown as fmt
 import asyncio
 import requests
+from requests.api import post
+from requests.models import Response, codes
 
 
 class Game(StatesGroup):
     question = State()
+    photo = State()
     typesOfPosts = State()
+    human = State()
+    postType = State()
 
 
 async def set_commands(bot: Bot):
@@ -229,19 +65,39 @@ async def main():
             title = 'Выбери город'
 
         await message.answer(title, reply_markup=markup)
+    userId = 0
 
     @bot.message_handler()
     async def send_text(message: types.Message, state: FSMContext):
         if message.text.lower() == 'мой профиль':
             cities = requests.get(
-                'http://127.0.0.1:8000/api/user/get/' + str(message.chat.id)).json()
+                'http://127.0.0.1:8000/api/user/get/{0}'.format(str(message.chat.id))).json()
+            idols = requests.get(
+                'http://127.0.0.1:8000/api/user/idols/get/{0}'.format(cities['id'])).json()
+            if idols:
+                idols = ', '.join(idols)
+            else:
+                idols = ' У вас нет кумиров'
 
-            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n\nКоличество сыграных разов\nв  «Угадай комика»: <u>{3}</u>\n".format(
-                cities["token"], cities["location"]["name"], cities["points"], cities["questions"])
+            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n\nКоличество сыграных разов\nв  «Угадай комика»: <u>{3}</u>\n \nКумиры: {4}".format(
+                cities["token"], cities["location"]["name"], cities["points"], cities["questions"], idols)
             markup = types.ReplyKeyboardMarkup(True, True)
             changeLocation = types.KeyboardButton('Поменять город')
-            markup.add(changeLocation)
+            setIdols = types.KeyboardButton('Выбрать кумиров')
+            markup.add(changeLocation, setIdols)
             await message.answer(textAbout, parse_mode=types.ParseMode.HTML, reply_markup=markup)
+
+        if message.text.lower() == 'выбрать кумиров':
+            cities = requests.get(
+                'http://127.0.0.1:8000/api/human/get/').json()
+            markup = types.ReplyKeyboardMarkup(True, True)
+            for i in range(0, len(cities)):
+                markup.add(types.KeyboardButton(cities[i]['name']))
+            markup.add(types.KeyboardButton('Сохранить список кумиров'))
+            markup.add(types.KeyboardButton('Очистить список'))
+            title = 'Выбери кумиров'
+            await message.answer(title, reply_markup=markup)
+            await Game.human.set()
 
         if message.text.lower() == 'поменять город':
             cities = requests.get('http://127.0.0.1:8000/api/city/get/').json()
@@ -267,6 +123,18 @@ async def main():
 
                 await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
 
+        if message.text.lower() == 'назад':
+            create = requests.get(
+                'http://127.0.0.1:8000/api/user/reg/{0}/{1}'.format(message.chat.id, message.text))
+
+            markup = types.ReplyKeyboardMarkup(True, True)
+            search = types.KeyboardButton('Поиск мероприятия')
+            game = types.KeyboardButton('Игра «Угадай комика»')
+            setting = types.KeyboardButton('Мой профиль')
+            markup.add(search, game, setting)
+
+            await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
+
         if message.text.lower() == 'другое':
             cities = requests.get('http://127.0.0.1:8000/api/city/get/').json()
             cityText = ''
@@ -282,6 +150,8 @@ async def main():
                 cityText), reply_markup=markup)
 
         if message.text.lower() == 'игра «угадай комика»':
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'ИграУгадайКомика'))
             markup = types.ReplyKeyboardMarkup(True, True)
             photo = types.KeyboardButton('Угадай комика по фотке')
             joke = types.KeyboardButton('Угадай комика по шутке')
@@ -290,6 +160,8 @@ async def main():
             await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
 
         if message.text.lower() == 'угадай комика по шутке':
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'УгадайПоШутке'))
             startGame = requests.get(
                 'http://127.0.0.1:8000/api/action/create/{0}/0/'.format(message.chat.id)).json()
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -298,26 +170,77 @@ async def main():
             await message.answer(startGame["question"]["question"], reply_markup=markup)
             await Game.question.set()
 
-        if message.text.lower() == 'поиск мероприятия':
-            human = requests.get('http://127.0.0.1:8000/api/types/get/').json()
+        if message.text.lower() == 'угадай комика по фотке':
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'УгадайПоФотке'))
+            startGame = requests.get(
+                'http://127.0.0.1:8000/api/action/create/{0}/1/'.format(message.chat.id)).json()
             markup = types.ReplyKeyboardMarkup(True, True)
-            for i in range(0, len(human)):
-                markup.add(types.KeyboardButton(human[i]['name']))
-            await message.answer('Выберите какой тип мероприятий', reply_markup=markup)
+            back = types.KeyboardButton('На главную')
+            markup.add(back)
+            await message.answer(
+                f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')} Кто это на фотографии ?",
+                parse_mode=types.ParseMode.HTML, reply_markup=markup)
+            await Game.photo.set()
+        # if message.text.lower() == 'поиск мероприятия':
+        #     typesOfPost = requests.get(
+        #         'http://127.0.0.1:8000/api/types/get/').json()
+        #     markup = types.ReplyKeyboardMarkup(True, True)
+        #     for i in range(0, len(typesOfPost)):
+        #         markup.add(types.KeyboardButton(typesOfPost[i]['name']))
+        #     await message.answer('Выберите какой тип мероприятий', reply_markup=markup)
 
-        human = requests.get('http://127.0.0.1:8000/api/types/get/').json()
-        for i in range(0, len(human)):
-            if message.text.lower() == human[i]['name']:
-                await Game.typesOfPosts.set()
-                state.update_data(typesOfPosts=message.text)
-                markup = types.ReplyKeyboardMarkup(True, True)
-                tooday = types.KeyboardButton('Сегодня')
-                toomorrow = types.KeyboardButton('Завтра')
-                inWeek = types.KeyboardButton('На этой неделе')
-                top = types.KeyboardButton('Топ на месяц')
-                location = types.KeyboardButton('Поиск по геолокации')
-                markup.add(tooday, toomorrow, inWeek, top, location)
-                await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
+        if message.text.lower()[0:2] == '/i':
+            requests.get('http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(
+                message.chat.id, 'ПереходНаПостНомер{0}'.format(message.text.lower()[2:])))
+            post = requests.get(
+                'http://127.0.0.1:8000/api/post/one/{0}'.format(message.text.lower()[2:])).json()
+            markup = types.InlineKeyboardMarkup(True, True)
+            if post['link']:
+                link = types.InlineKeyboardButton(
+                    'Ссылка на покупку', url=post['link'])
+                markup.add(link)
+            if post['linkForChat']:
+                linkForChat = types.InlineKeyboardButton(
+                    'Ссылка на чат', url=post['linkForChat'])
+                markup.add(linkForChat)
+            if post['linkRegistr']:
+                linkRegistr = types.InlineKeyboardButton(
+                    'Ссылка на регистрацию', url=post['linkRegistr'])
+                markup.add(linkRegistr)
+
+            humans = ''
+            for k in range(0, len(post['human'])):
+                humans += '{0}'.format(post['human'][k]['name'])
+                if not k == (len(post['human']) - 1):
+                    humans += ', '
+
+            await message.answer(
+                f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')}"
+                f"<b>{post['title']}</b> \n\n"
+                f"{post['describe']} \n"
+                f"Местоположение: {post['location']} \n\n"
+                f"Начало:  <u>{post['timeStart'].split('T')[0]} - {post['timeStart'].split('T')[1][:-1]}</u>\n"
+                f"Вход:  <u>{post['timeEnd'].split('T')[0]} - {post['timeEnd'].split('T')[1][:-1]}</u>\n\n"
+                f"Выступает: {humans} \n"
+                f"Цена: {str(post['cost']) + ' р.' if post['cost'] else 'Бесплатно'} \n",
+                parse_mode=types.ParseMode.HTML, reply_markup=markup)
+
+        if message.text.lower() == 'поиск мероприятия':
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'ПоискМероприятия'))
+            markup = types.ReplyKeyboardMarkup(True, True)
+            count = requests.get(
+                'http://127.0.0.1:8000/api/posts/count/').json()
+
+            tooday = types.KeyboardButton(f'Сегодня ({count["tooday"]})')
+            toomorrow = types.KeyboardButton(f'Завтра ({count["tomorrow"]})')
+            inWeek = types.KeyboardButton(f'На этой неделе ({count["week"]})')
+            top = types.KeyboardButton(f'Топ на месяц ({count["best"]})')
+            location = types.KeyboardButton('Поиск по геолокации')
+            markup.add(tooday, toomorrow, inWeek, top, location)
+            await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
+            await Game.typesOfPosts.set()
 
     @bot.message_handler(state=Game.question)
     async def send_text(message: types.Message, state: FSMContext):
@@ -353,10 +276,235 @@ async def main():
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
 
-    @bot.message_handler(state=Game.typesOfPosts)
+    @bot.message_handler(state=Game.photo)
     async def send_text(message: types.Message, state: FSMContext):
-        current_state = await state.get_state()
-        await message.answer(current_state['typesOfPosts'])
+        if not message.text == 'На главную':
+            getHuman = requests.get(
+                'http://127.0.0.1:8000/api/action/get/{0}'.format(message.chat.id)).json()
+            if message.text == getHuman["question"]["human"]["name"]:
+                requests.get('http://127.0.0.1:8000/api/user/add/points/{0}/{1}'.format(
+                    message.chat.id, getHuman["question"]["points"]))
+
+                await message.answer('Праавильно, на ваш профиль зачислено {0} очков'.format(
+                    getHuman["question"]["points"]))
+
+                startGame = requests.get(
+                    'http://127.0.0.1:8000/api/action/create/{0}/1/'.format(message.chat.id)).json()
+                markup = types.ReplyKeyboardMarkup(True, True)
+                back = types.KeyboardButton('На главную')
+                markup.add(back)
+
+                await message.answer(
+                    f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')} Кто это на фотографии ?",
+                    parse_mode=types.ParseMode.HTML)
+            else:
+                markup = types.ReplyKeyboardMarkup(True, True)
+                back = types.KeyboardButton('На главную')
+                markup.add(back)
+                await message.answer('Неправильно, попробуйте еще', reply_markup=markup)
+
+        else:
+            await state.finish()
+            markup = types.ReplyKeyboardMarkup(True, True)
+            search = types.KeyboardButton('Поиск мероприятия')
+            game = types.KeyboardButton('Игра «Угадай комика»')
+            setting = types.KeyboardButton('Мой профиль')
+            title = 'Привет, чего ты хочешь ?'
+            markup.add(search, game, setting)
+            await message.answer(title, reply_markup=markup)
+
+    @bot.message_handler(state=Game.typesOfPosts)
+    async def send_text(message, state: FSMContext):
+
+        if 'Сегодня' in message.text:
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Сегодня'))
+            await state.update_data(postType=0)
+        elif 'Завтра' in message.text:
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Завтра'))
+            await state.update_data(postType=1)
+        elif 'На этой неделе' in message.text:
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'НаЭтойНеделе'))
+            await state.update_data(postType=2)
+        elif 'Топ на месяц' in message.text:
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Топ'))
+            await state.update_data(postType=3)
+        elif 'Поиск по геолокации' in message.text:
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Геолокация'))
+            await state.update_data(postType=0)
+
+        current_state = await state.get_data()
+        resp = requests.get(
+            'http://127.0.0.1:8000/api/post/types/{0}'.format(current_state.get('postType'))).json()
+
+        # if message.text.lower() == 'бесплатные' or message.text.lower() == 'платные' or message.text.lower() == 'назад':
+        #     # {fmt.hide_link('http://127.0.0.1:8000{0}'.format(resp[0]['photo']))}
+        #     markup = types.ReplyKeyboardMarkup(True, True)
+        #     main = types.KeyboardButton('На главную')
+        #     markup.add(main)
+
+        #     if resp:
+        #         title = '<b>Мероприятия:</b> \n'
+        #         for i in range(0, len(resp)):
+        #             title = title + \
+        #                 f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+        #         await message.answer(title, parse_mode=types.ParseMode.HTML, reply_markup=markup)
+        #     else:
+        #         await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
+        if message.text.lower()[0:2] == '/i':
+            requests.get(
+                'http://127.0.0.1:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'ПереходНаПостНомер{0}'.format(message.text.lower()[2:])))
+            for i in range(0, len(resp)):
+                if message.text.lower() == f"/i{resp[i]['id']}":
+
+                    markup = types.InlineKeyboardMarkup(True, True)
+                    if resp[i]['link']:
+                        link = types.InlineKeyboardButton(
+                            'Ссылка на покупку', url=resp[i]['link'])
+                        markup.add(link)
+                    if resp[i]['linkForChat']:
+                        linkForChat = types.InlineKeyboardButton(
+                            'Ссылка на чат', url=resp[i]['linkForChat'])
+                        markup.add(linkForChat)
+                    if resp[i]['linkRegistr']:
+                        linkRegistr = types.InlineKeyboardButton(
+                            'Ссылка на регистрацию', url=resp[i]['linkRegistr'])
+                        markup.add(linkRegistr)
+
+                    humans = ''
+                    for k in range(0, len(resp[i]['human'])):
+                        humans += '{0}'.format(resp[i]['human'][k]['name'])
+                        if not k == (len(resp[i]['human']) - 1):
+                            humans += ', '
+                    await message.answer(
+                        f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')}"
+                        f"<b>{resp[i]['title']}</b> \n\n"
+                        f"{resp[i]['describe']} \n"
+                        f"Местоположение: {resp[i]['location']} \n\n"
+                        f"Начало:  <u>{resp[i]['timeStart'].split('T')[i]} - {resp[i]['timeStart'].split('T')[1][:-1]}</u>\n"
+                        f"Вход:  <u>{resp[i]['timeEnd'].split('T')[i]} - {resp[i]['timeEnd'].split('T')[1][:-1]}</u>\n\n"
+                        f"Выступает: {humans} \n"
+                        f"Цена: {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} \n",
+                        parse_mode=types.ParseMode.HTML, reply_markup=markup)
+
+        elif message.text.lower() == 'на главную':
+            await state.finish()
+            markup = types.ReplyKeyboardMarkup(True, True)
+            search = types.KeyboardButton('Поиск мероприятия')
+            game = types.KeyboardButton('Игра «Угадай комика»')
+            setting = types.KeyboardButton('Мой профиль')
+            title = 'Привет, чего ты хочешь ?'
+            markup.add(search, game, setting)
+            await message.answer(title, reply_markup=markup)
+        elif message.text.lower() == 'поиск по геолокации':
+            await state.finish()
+            title = 'Чтобы найти ближайшие к Вам кинотеатры, отправьте своё местоположение: \n● Нажмите 📎 \n● Выберите «Location»\n● Нажмите «Send my current location» (локацию можно изменить перед отправкой).'
+            await message.answer(title)
+        else:
+            markup = types.ReplyKeyboardMarkup(True, True)
+            main = types.KeyboardButton('На главную')
+            markup.add(main)
+
+            if resp:
+
+                paidText = ''
+                freeText = ''
+                depositText = ''
+                donationText = ''
+                for i in range(0, len(resp)):
+                    if resp[i]['cost'] == 0:
+                        freeText = freeText + \
+                            f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                    else:
+                        if resp[i]['costType'] == 0:
+                            paidText = paidText + \
+                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                        if resp[i]['costType'] == 1:
+                            depositText = depositText + \
+                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - депозит в размере{str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                        if resp[i]['costType'] == 2:
+                            donationText = donationText + \
+                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - донат (любая купюра)(/i{resp[i]['id']})"
+
+                if not paidText:
+                    paidText = 'Мероприятий не найдено'
+                if not freeText:
+                    freeText = 'Мероприятий не найдено'
+                if not depositText:
+                    depositText = 'Мероприятий не найдено'
+                if not donationText:
+                    donationText = 'Мероприятий не найдено'
+
+                mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u> \n {paidText} \n\n <u>Бесплатно:</u> \n {freeText} \n\n <u>Депозит:</u> \n {depositText} \n\n <u>Донаты:</u> \n {donationText}'
+
+                await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup)
+            else:
+                await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
+
+    data = []
+
+    @bot.message_handler(state=Game.human)
+    async def send_text(message: types.Message, state: FSMContext):
+        print(message.text)
+        if message.text == 'Сохранить список кумиров':
+            requests.post('http://127.0.0.1:8000/api/user/idols/', json={
+                "token": message.chat.id,
+                "humans": data
+            }
+            )
+            await state.finish()
+            markup = types.ReplyKeyboardMarkup(True, True)
+            search = types.KeyboardButton('Поиск мероприятия')
+            game = types.KeyboardButton('Игра «Угадай комика»')
+            setting = types.KeyboardButton('Мой профиль')
+            title = 'Привет, чего ты хочешь ?'
+            markup.add(search, game, setting)
+            await message.answer(title, reply_markup=markup)
+
+        elif message.text == 'Очистить список':
+            requests.post('http://127.0.0.1:8000/api/user/idols/', json={
+                "token": message.chat.id,
+                "humans": []
+            }
+            )
+            await state.finish()
+            markup = types.ReplyKeyboardMarkup(True, True)
+            search = types.KeyboardButton('Поиск мероприятия')
+            game = types.KeyboardButton('Игра «Угадай комика»')
+            setting = types.KeyboardButton('Мой профиль')
+            title = 'Привет, чего ты хочешь ?'
+            markup.add(search, game, setting)
+            await message.answer(title, reply_markup=markup)
+        else:
+            data.append(message.text)
+            await message.answer('Успешно добавлено, чтобы применить изменения нажмите - Сохранить список кумиров')
+
+    @bot.message_handler(content_types=["location"])
+    async def loc_handler(message):
+        print(message)
+        resp = requests.get('http://127.0.0.1:8000/api/post/coord/{0}/{1}'.format(
+            message.location.latitude, message.location.longitude)).json()
+        title = '<b>Ближайшие мероприятия:</b> \n'
+        for i in range(0, len(resp)):
+            cost = ''
+            if resp[i][1]['cost'] == 0:
+                cost = 'Беспалтно'
+            else:
+                if(resp[i][1]['costType'] == 0):
+                    cost = str(resp[i][1]['cost']) + ' р.'
+                elif(resp[i][1]['costType'] == 1):
+                    cost = 'Депозит в размере' + \
+                        str(resp[i][1]['cost']) + ' р.'
+                else:
+                    cost = 'Любая купюра'
+            if not resp[i][0] == 99999999:
+                title = title + \
+                    f"\nРасстояние: <b>{resp[i][0]} метров</b>  \n● {resp[i][1]['timeEnd'].split('T')[0]} <b>{resp[i][1]['title']}</b> <u>{resp[i][1]['location']}</u>\n Вход - {cost} (/i{resp[i][1]['id']}) \n"
+        await message.answer(title, parse_mode=types.ParseMode.HTML)
 
     await set_commands(botInit)
     await bot.start_polling()

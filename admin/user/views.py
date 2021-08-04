@@ -1,12 +1,19 @@
 from django.shortcuts import render
 from rest_framework import generics
 
-from user.models import User, Actions
-from user.serilizers import UserSerializer, UserListSerializer, ActionsSerializer, ActionsListSerializer
+from user.models import User, Actions, Idols, Push, Stat
+from user.serilizers import UserSerializer, UserListSerializer, ActionsSerializer, ActionsListSerializer, IdolsSerializer, IdolsListSerializer, StatSerializer
 from rest_framework.response import Response
-from index.models import City, Game
+from index.models import City, Game, Human, Posts
+from index.serilizers import PostSerializer
 from django.db.models import F
 import random
+import requests
+import time
+import aiogram.utils.markdown as fmt
+from aiogram.types import ParseMode
+from aiogram import Bot, Dispatcher, types
+import json
 
 
 class UserList(generics.ListAPIView):
@@ -122,3 +129,119 @@ class GameGetOne(generics.ListAPIView):
             return Response(data={"status": "success"})
         else:
             return Response(data={"user": 'fail'})
+
+
+class UserSetIdols(generics.ListAPIView):
+    queryset = Idols.objects.all()
+    serializer_class = IdolsSerializer
+
+    def post(self, request):
+        userId = User.objects.filter(token=request.data['token']).first().id
+        Idols.objects.filter(user=userId).delete()
+        arrayId = []
+        for i in range(0, len(request.data['humans'])):
+            getHumanId = Human.objects.filter(
+                name=request.data['humans'][i]).first().id
+            arrayId.append(getHumanId)
+        serData = IdolsSerializer(
+            data={"user": userId, "humans": arrayId})
+        if serData.is_valid():
+            serData.save()
+        return Response(data=serData.data)
+
+
+class UserGetIdols(generics.ListAPIView):
+    queryset = Idols.objects.all()
+    serializer_class = IdolsListSerializer
+
+    def get(self, request, id):
+        data = Idols.objects.filter(user=id).first()
+        if data:
+            serData = IdolsListSerializer(data).data['humans']
+            responseData = []
+            for i in range(0, len(serData)):
+                responseData.append(serData[i]['name'])
+            return Response(data=responseData)
+        else:
+            return Response(data={})
+
+
+class Send(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get(self, request, id):
+        getData = Push.objects.get(pk=id)
+        getAllUsers = User.objects.filter(location=getData.city)
+
+        for i in range(0, len(getAllUsers)):
+            method = "sendMessage"
+            token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+            url = f"https://api.telegram.org/bot{token}/{method}"
+            text = f'<b>{getData.title}</b> \n\n{getData.describe}'
+            if getData.photo:
+                text += f'{fmt.hide_link(getData.photo)}'
+
+            data = {"chat_id": getAllUsers[i].token,
+                    "text": text,
+                    'parse_mode': types.ParseMode.HTML
+                    }
+            requests.post(url, data=data)
+        return Response(status=200)
+
+
+class StatAdd(generics.ListAPIView):
+    queryset = Stat.objects.all()
+    serializer_class = StatSerializer
+
+    def get(self, request, id, slug):
+        getData = User.objects.filter(token=id).first().id
+        data = StatSerializer(data={'user': getData, 'action': slug})
+        if data.is_valid():
+            data.save()
+            return Response(data=data.data)
+        else:
+            return Response(data=data.errors)
+
+
+class SendIdolsPush(generics.ListAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = PostSerializer
+
+    def get(self, request, id):
+        instance = Posts.objects.get(pk=id)
+        for i in range(0, len(instance.human.all())):
+            idolId = instance.human.all()[i].id
+            userToken = Idols.objects.filter(humans__in=[idolId]).first()
+            print(userToken.user, idolId)
+            method = "sendMessage"
+            token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+            url = f"https://api.telegram.org/bot{token}/{method}"
+
+            markup = []
+            if instance.link:
+                markup.add(
+                    [{'text': 'Ссылка на покупку', 'url': instance.link}])
+            if instance.linkForChat:
+                markup.add(
+                    [{'text': 'Ссылка на чат', 'url': instance.linkForChat}])
+            if instance.linkRegistr:
+                markup.add(
+                    [{'text': 'Ссылка на регистрацию', 'url': instance.linkRegistr}])
+
+            data = {"chat_id": userToken.user,
+                    "text": f"<b>{instance.title}</b> \n\n"
+                    f"{instance.describe} \n"
+                    f"Местоположение: {instance.location} \n\n"
+                    f"Начало:  <u>{str(instance.timeStart).split('T')[0]}</u>\n"
+                    f"Вход:  <u>{str(instance.timeEnd).split('T')[0]}</u>\n\n"
+                    f"Цена: {str(instance.cost) + ' р.' if instance.cost else 'Бесплатно'} \n",
+                    'parse_mode': types.ParseMode.HTML,
+                    'reply_markup': json.dumps({'inline_keyboard': [markup],
+                                                'resize_keyboard': True,
+                                                'one_time_keyboard': True,
+                                                'selective': True})
+                    }
+            data = requests.post(url, data=data)
+
+        return Response(data=data.json())

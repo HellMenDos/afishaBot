@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+
+<script>
+  function Send(data) {
+    let url = document.location.href.split('/').slice(0,3).join('/')
+    fetch(`${url}/api/push/send/${data}/`).then((e) => {
+      window.location.href = `${url}/admin/user/push/`
+    })
+  }
+</script>
+<input type="button" value="Отправить" onclick="Send({{id}})" class="default" name="send" style="width:100%">
+{{ block.super }}
+{% endblock %}

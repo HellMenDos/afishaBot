@@ -1,0 +1,39 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+{% if create %}
+
+{% if status %}
+    {% if not paid %}
+    <input type="button" value="Одобрить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    {% else %}
+    <input type="button" value="Одобрено" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    {% endif %}
+{% else %}
+    {% if not paid %}
+    <input type="button" value="Оплатить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    {% else %}
+    <input type="button" value="Оплачено" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    {% endif %}
+{% endif %}
+{% endif %}
+
+{{ block.super }}
+
+<script>
+  function Approove(data,status) {
+    let url = document.location.href.split('/').slice(0,3).join('/')
+    fetch(`${url}/api/post/update/${data}/${status}/`).then((e) => {
+      window.location.href = `${url}/admin/index/posts/`
+    })
+  }
+  if('{{create}}' == 'False') {
+    document.querySelector('.field-theBest').style.display = 'none'
+  }else{
+    if('{{status}}' == 'False') {
+      document.querySelector('.field-theBest').style.display = 'none'
+    }
+  }
+
+</script>
+{% endblock %}
