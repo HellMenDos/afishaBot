@@ -73,6 +73,7 @@ class Posts(models.Model):
                             verbose_name='Ссылка на покупку')
     linkRegistr = models.CharField(max_length=500, blank=True, default='',
                                    verbose_name='Ссылка на регистрацию')
+    sended = models.BooleanField(default=False, verbose_name='Оповещено')
 
     def __str__(self):
         return f'{self.title}  {self.timeStart}'
@@ -82,13 +83,49 @@ class Posts(models.Model):
         verbose_name_plural = 'Мероприятия'
 
 
-@receiver(post_save, sender=Posts)
-def posts_update(sender, instance, created, **kwargs):
-    for i in range(0, len(instance.human.all())):
-        idolId = instance.human.all()[i].id
-        userToken = Idols.objects.filter(humans__in=[idolId]).first()
-        print(userToken.user)
-    print(len(instance.human_list.all()))
+# @receiver(post_save, sender=Posts)
+# def posts_update(sender, instance, created, **kwargs):
+#     for i in range(0, len(instance.human.all())):
+#         idolId = instance.human.all()[i].id
+#         userToken = Idols.objects.filter(humans__in=[idolId]).first()
+#     print(instance.human.all()[0].id)
+#     print(len(instance.human_list.all()))
+
+# @receiver(post_save, sender=Posts)
+# def posts_update(sender, instance, created, **kwargs):
+#     for i in range(0, len(instance.human.all())):
+#         idolId = instance.human.all()[i].id
+#         userToken = requests.get(
+#             f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
+#         method = "sendMessage"
+#         token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+#         url = f"https://api.telegram.org/bot{token}/{method}"
+
+#         markup = []
+#         if instance.link:
+#             markup.add(
+#                 [{'text': 'Ссылка на покупку', 'url': instance.link}])
+#         if instance.linkForChat:
+#             markup.add(
+#                 [{'text': 'Ссылка на чат', 'url': instance.linkForChat}])
+#         if instance.linkRegistr:
+#             markup.add(
+#                 [{'text': 'Ссылка на регистрацию', 'url': instance.linkRegistr}])
+
+#         data = {"chat_id": userToken['user'],
+#                 "text": f"<b>{instance.title}</b> \n\n"
+#                 f"{instance.describe} \n"
+#                 f"Местоположение: {instance.location} \n\n"
+#                 f"Начало:  <u>{str(instance.timeStart).split('T')[0]}</u>\n"
+#                 f"Вход:  <u>{str(instance.timeEnd).split('T')[0]}</u>\n\n"
+#                 f"Цена: {str(instance.cost) + ' р.' if instance.cost else 'Бесплатно'} \n",
+#                 'parse_mode': types.ParseMode.HTML,
+#                 'reply_markup': json.dumps({'inline_keyboard': [markup],
+#                                             'resize_keyboard': True,
+#                                             'one_time_keyboard': True,
+#                                             'selective': True})
+#                 }
+#         data = requests.post(url, data=data)
 
 
 class Game(models.Model):

@@ -166,6 +166,18 @@ class UserGetIdols(generics.ListAPIView):
             return Response(data={})
 
 
+class IdolsGetToken(generics.ListAPIView):
+    queryset = Idols.objects.all()
+    serializer_class = IdolsListSerializer
+
+    def get(self, request, id):
+        data = Idols.objects.filter(humans__in=[id]).first()
+        if data:
+            return Response(data={"user": data.user.token})
+        else:
+            return Response(data={})
+
+
 class Send(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -208,40 +220,41 @@ class SendIdolsPush(generics.ListAPIView):
     queryset = Posts.objects.all()
     serializer_class = PostSerializer
 
-    def get(self, request, id):
-        instance = Posts.objects.get(pk=id)
-        for i in range(0, len(instance.human.all())):
-            idolId = instance.human.all()[i].id
-            userToken = Idols.objects.filter(humans__in=[idolId]).first()
-            print(userToken.user, idolId)
-            method = "sendMessage"
-            token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
-            url = f"https://api.telegram.org/bot{token}/{method}"
+    def get(self, request):
+        instance = Posts.objects.filter(sended=False)
+        for j in range(0, len(instance)):
+            for i in range(0, len(instance[j].human.all())):
+                idolId = instance[j].human.all()[i].id
+                userToken = requests.get(
+                    f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
+                method = "sendMessage"
+                token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+                url = f"https://api.telegram.org/bot{token}/{method}"
 
-            markup = []
-            if instance.link:
-                markup.add(
-                    [{'text': 'Ссылка на покупку', 'url': instance.link}])
-            if instance.linkForChat:
-                markup.add(
-                    [{'text': 'Ссылка на чат', 'url': instance.linkForChat}])
-            if instance.linkRegistr:
-                markup.add(
-                    [{'text': 'Ссылка на регистрацию', 'url': instance.linkRegistr}])
+                markup = []
+                if instance[j].link:
+                    markup.add(
+                        [{'text': 'Ссылка на покупку', 'url': instance[j].link}])
+                if instance[j].linkForChat:
+                    markup.add(
+                        [{'text': 'Ссылка на чат', 'url': instance[j].linkForChat}])
+                if instance[j].linkRegistr:
+                    markup.add(
+                        [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
 
-            data = {"chat_id": userToken.user,
-                    "text": f"<b>{instance.title}</b> \n\n"
-                    f"{instance.describe} \n"
-                    f"Местоположение: {instance.location} \n\n"
-                    f"Начало:  <u>{str(instance.timeStart).split('T')[0]}</u>\n"
-                    f"Вход:  <u>{str(instance.timeEnd).split('T')[0]}</u>\n\n"
-                    f"Цена: {str(instance.cost) + ' р.' if instance.cost else 'Бесплатно'} \n",
-                    'parse_mode': types.ParseMode.HTML,
-                    'reply_markup': json.dumps({'inline_keyboard': [markup],
-                                                'resize_keyboard': True,
-                                                'one_time_keyboard': True,
-                                                'selective': True})
-                    }
-            data = requests.post(url, data=data)
-
-        return Response(data=data.json())
+                data = {"chat_id": userToken['user'],
+                        "text": f"<b>{instance[j].title}</b> \n\n"
+                        f"{instance[j].describe} \n"
+                        f"Местоположение: {instance[j].location} \n\n"
+                        f"Начало:  <u>{str(instance[j].timeStart).split('T')[0]}</u>\n"
+                        f"Вход:  <u>{str(instance[j].timeEnd).split('T')[0]}</u>\n\n"
+                        f"Цена: {str(instance[j].cost) + ' р.' if instance[j].cost else 'Бесплатно'} \n",
+                        'parse_mode': types.ParseMode.HTML,
+                        'reply_markup': json.dumps({'inline_keyboard': [markup],
+                                                    'resize_keyboard': True,
+                                                    'one_time_keyboard': True,
+                                                    'selective': True})
+                        }
+                requests.post(url, data=data)
+        instance.update(sended=True)
+        return Response(data={})

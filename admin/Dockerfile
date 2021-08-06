@@ -1,4 +1,5 @@
-FROM python:3.6
+FROM python:3.7.0-stretch
+
 RUN mkdir /admin
 COPY ./ /admin
 WORKDIR /admin

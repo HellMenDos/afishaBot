@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from user.views import UserOne, UserAddPoints, UserList, UserStatTop, UserCheck, UserGetByToken, GameStart, GameGetOne, UserSetIdols, UserGetIdols, Send, StatAdd, SendIdolsPush
+from user.views import UserOne, UserAddPoints, UserList, UserStatTop, UserCheck, UserGetByToken, GameStart, GameGetOne, UserSetIdols, UserGetIdols, Send, StatAdd, SendIdolsPush, IdolsGetToken
 
 
 urlpatterns = [
@@ -23,6 +23,8 @@ urlpatterns = [
     url('push/send/(?P<id>[0-9]+)/?$', Send.as_view()),
     url('stat/add/(?P<id>[0-9]+)/(?P<slug>[0-9а-яА-Яa-zA-Z]+)/?$',
         StatAdd.as_view()),
-    url('send/idols/(?P<id>[0-9]+)/?$',
+    url('send/idols/?$',
         SendIdolsPush.as_view()),
+    url('get/token/idols/(?P<id>[0-9]+)/?$',
+        IdolsGetToken.as_view()),
 ]
