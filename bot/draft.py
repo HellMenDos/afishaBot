@@ -3,8 +3,6 @@ import time
 from aiogram import Bot, Dispatcher, types
 import aiogram.utils.markdown as fmt
 
-%JqEmZa3
-
 
 def send_message():
     method = "sendMessage"
