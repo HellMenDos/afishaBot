@@ -23,14 +23,14 @@ class Game(StatesGroup):
 
 async def set_commands(bot: Bot):
     commands = [
-        types.BotCommand(command="/profile", description="Профиль 🤖 🤖"),
+        types.BotCommand(command="/profile", description="Профиль 🤖 "),
         types.BotCommand(command="/search", description="Поиск 🔍"),
         types.BotCommand(command="/tooday",
                          description="Мероприятия на сегодня 😄"),
         types.BotCommand(command="/tomorrow",
                          description="Мероприятия на завтра ⌚️"),
         types.BotCommand(command="/game",
-                         description="Игра 🎲 🎲"),
+                         description="Игра 🎲 "),
         types.BotCommand(command="/start",
                          description="Главная")
     ]
@@ -244,7 +244,7 @@ async def main():
             toomorrow = types.KeyboardButton(f'Завтра({count["tomorrow"]}) ⌚️')
             inWeek = types.KeyboardButton(f'На неделе ({count["week"]}) 🗓️')
             top = types.KeyboardButton(f'Топ ({count["best"]}) 🔝')
-            location = types.KeyboardButton('Поиск по геолокации 📍')
+            location = types.KeyboardButton('По геолокации 📍')
             markup.add(tooday, toomorrow, inWeek, top, location)
             await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
             await Game.typesOfPosts.set()
@@ -380,7 +380,7 @@ async def main():
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Топ'))
             await state.update_data(postType=3)
-        elif 'Поиск по геолокации' in message.text:
+        elif 'По геолокации' in message.text:
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Геолокация'))
             await state.update_data(postType=0)
@@ -452,7 +452,7 @@ async def main():
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
-        elif message.text.lower() == 'поиск по геолокации 📍':
+        elif message.text.lower() == 'По геолокации 📍':
             await state.finish()
             title = 'Чтобы найти ближайшие к Вам кинотеатры, отправьте своё местоположение: \n● Нажмите 📎 \n● Выберите «Location»\n● Нажмите «Send my current location» (локацию можно изменить перед отправкой).'
             await message.answer(title)

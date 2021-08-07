@@ -7,13 +7,13 @@
     {% if not paid %}
     <input type="button" value="Одобрить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
     {% else %}
-    <input type="button" value="Одобрено" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <input type="button" value="Одобрено" disabled onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
     {% endif %}
 {% else %}
     {% if not paid %}
     <input type="button" value="Оплатить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
     {% else %}
-    <input type="button" value="Оплачено" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <input type="button" value="Оплачено" disabled onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
     {% endif %}
 {% endif %}
 {% endif %}
@@ -36,4 +36,7 @@
   }
 
 </script>
+<p>Чтобы вставить ссылку в ваш пост вы должны взять эту строку </br><plaintext><a href="ВАША ССЫЛКА">ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ</a> </plaintext><br>
+  и заменить "ВАША ССЫЛКА" на вашу ссылку, "ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ" на ваш текст
+ </p>
 {% endblock %}
