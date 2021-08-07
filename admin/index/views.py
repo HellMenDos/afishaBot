@@ -65,7 +65,7 @@ class PostsGetCount(generics.ListAPIView):
 
     def get(self, request):
         type = TypeOfPosts.objects.all().first().id
-        data = Posts.objects.filter(typeOfPost=type)
+        data = Posts.objects.filter(typeOfPost=type, paid=True)
 
         date = datetime.date.today()
 
@@ -87,7 +87,7 @@ class PostsGetWithTypes(generics.ListAPIView):
 
     def get(self, request, day):
         type = TypeOfPosts.objects.all().first().id
-        data = Posts.objects.filter(typeOfPost=type)
+        data = Posts.objects.filter(typeOfPost=type, paid=True)
 
         date = datetime.date.today()
 

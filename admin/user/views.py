@@ -241,9 +241,13 @@ class SendIdolsPush(generics.ListAPIView):
                 if instance[j].linkRegistr:
                     markup.add(
                         [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
+                photo = ''
+                if instance[j].photo:
+                    photo = fmt.hide_link(instance[j].photo)
 
                 data = {"chat_id": userToken['user'],
-                        "text": f"<b>{instance[j].title}</b> \n\n"
+                        "text": f"{photo}"
+                        f"<b>{instance[j].title}</b> \n\n"
                         f"{instance[j].describe} \n"
                         f"Местоположение: {instance[j].location} \n\n"
                         f"Начало:  <u>{str(instance[j].timeStart).split('T')[0]}</u>\n"

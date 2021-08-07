@@ -23,14 +23,14 @@ class Game(StatesGroup):
 
 async def set_commands(bot: Bot):
     commands = [
-        types.BotCommand(command="/profile", description="Мой профиль"),
-        types.BotCommand(command="/search", description="Поиск мероприятия"),
+        types.BotCommand(command="/profile", description="Профиль 🤖 🤖"),
+        types.BotCommand(command="/search", description="Поиск 🔍"),
         types.BotCommand(command="/tooday",
-                         description="Мероприятия на сегодня"),
-        types.BotCommand(command="/yesterday",
-                         description="Мероприятия на завтра"),
+                         description="Мероприятия на сегодня 😄"),
+        types.BotCommand(command="/tomorrow",
+                         description="Мероприятия на завтра ⌚️"),
         types.BotCommand(command="/game",
-                         description="Игра «Угадай комика»"),
+                         description="Игра 🎲 🎲"),
         types.BotCommand(command="/start",
                          description="Главная")
     ]
@@ -50,9 +50,9 @@ async def main():
 
         if response.json()['have']:
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
         else:
@@ -70,7 +70,7 @@ async def main():
 
     @bot.message_handler()
     async def send_text(message: types.Message, state: FSMContext):
-        if message.text.lower() == 'мой профиль':
+        if message.text.lower() == 'профиль 🤖' or message.text == '/profile':
             cities = requests.get(
                 'http://45.147.178.7:8000/api/user/get/{0}'.format(str(message.chat.id))).json()
             idols = requests.get(
@@ -118,9 +118,9 @@ async def main():
                     'http://45.147.178.7:8000/api/user/reg/{0}/{1}'.format(message.chat.id, message.text))
 
                 markup = types.ReplyKeyboardMarkup(True, True)
-                search = types.KeyboardButton('Поиск мероприятия')
-                game = types.KeyboardButton('Игра «Угадай комика»')
-                setting = types.KeyboardButton('Мой профиль')
+                search = types.KeyboardButton('Поиск 🔍')
+                game = types.KeyboardButton('Игра 🎲')
+                setting = types.KeyboardButton('Профиль 🤖')
                 markup.add(search, game, setting)
 
                 await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
@@ -130,9 +130,9 @@ async def main():
                 'http://45.147.178.7:8000/api/user/reg/{0}/{1}'.format(message.chat.id, message.text))
 
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             markup.add(search, game, setting)
 
             await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
@@ -152,7 +152,7 @@ async def main():
             await message.answer('К сожалению я пока ищу только в {} но это ненадолго. Напиши из какого ты города и я уведомлю, когда смогу тебе помогать.'.format(
                 cityText), reply_markup=markup)
 
-        if message.text.lower() == 'игра «угадай комика»':
+        if message.text.lower() == 'игра 🎲' or message.text == '/game':
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'ИграУгадайКомика'))
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -182,10 +182,10 @@ async def main():
             back = types.KeyboardButton('На главную')
             markup.add(back)
             await message.answer(
-                f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')} Кто это на фотографии ?",
+                f"{fmt.hide_link(startGame['question']['photo'])} Кто это на фотографии ?",
                 parse_mode=types.ParseMode.HTML, reply_markup=markup)
             await Game.photo.set()
-        # if message.text.lower() == 'поиск мероприятия':
+        # if message.text.lower() == 'Поиск 🔍':
         #     typesOfPost = requests.get(
         #         'http://45.147.178.7:8000/api/types/get/').json()
         #     markup = types.ReplyKeyboardMarkup(True, True)
@@ -212,6 +212,10 @@ async def main():
                     'Ссылка на регистрацию', url=post['linkRegistr'])
                 markup.add(linkRegistr)
 
+            photo = ''
+            if post['photo']:
+                photo = fmt.hide_link(post['photo'])
+
             humans = ''
             for k in range(0, len(post['human'])):
                 humans += '{0}'.format(post['human'][k]['name'])
@@ -219,7 +223,7 @@ async def main():
                     humans += ', '
 
             await message.answer(
-                f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')}"
+                f"{photo}"
                 f"<b>{post['title']}</b> \n\n"
                 f"{post['describe']} \n"
                 f"Местоположение: {post['location']} \n\n"
@@ -229,21 +233,62 @@ async def main():
                 f"Цена: {str(post['cost']) + ' р.' if post['cost'] else 'Бесплатно'} \n",
                 parse_mode=types.ParseMode.HTML, reply_markup=markup)
 
-        if message.text.lower() == 'поиск мероприятия':
+        if message.text.lower() == 'поиск 🔍' or message.text == '/search':
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'ПоискМероприятия'))
             markup = types.ReplyKeyboardMarkup(True, True)
             count = requests.get(
                 'http://45.147.178.7:8000/api/posts/count/').json()
 
-            tooday = types.KeyboardButton(f'Сегодня ({count["tooday"]})')
-            toomorrow = types.KeyboardButton(f'Завтра ({count["tomorrow"]})')
-            inWeek = types.KeyboardButton(f'На этой неделе ({count["week"]})')
-            top = types.KeyboardButton(f'Топ на месяц ({count["best"]})')
-            location = types.KeyboardButton('Поиск по геолокации')
+            tooday = types.KeyboardButton(f'Сегодня({count["tooday"]}) 😄')
+            toomorrow = types.KeyboardButton(f'Завтра({count["tomorrow"]}) ⌚️')
+            inWeek = types.KeyboardButton(f'На неделе ({count["week"]}) 🗓️')
+            top = types.KeyboardButton(f'Топ ({count["best"]}) 🔝')
+            location = types.KeyboardButton('Поиск по геолокации 📍')
             markup.add(tooday, toomorrow, inWeek, top, location)
             await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
             await Game.typesOfPosts.set()
+
+            if message.text == '/tooday' or message.text == '/tomorrow':
+                index = 1 if message.text == '/tomorrow' else 0
+
+                resp = requests.get(
+                    'http://45.147.178.7:8000/api/post/types/{0}'.format(index)).json()
+                if resp:
+
+                    paidText = ''
+                    freeText = ''
+                    depositText = ''
+                    donationText = ''
+                    for i in range(0, len(resp)):
+                        if resp[i]['cost'] == 0:
+                            freeText = freeText + \
+                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                        else:
+                            if resp[i]['costType'] == 0:
+                                paidText = paidText + \
+                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                            if resp[i]['costType'] == 1:
+                                depositText = depositText + \
+                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - депозит в размере{str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (/i{resp[i]['id']})"
+                            if resp[i]['costType'] == 2:
+                                donationText = donationText + \
+                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - донат (любая купюра)(/i{resp[i]['id']})"
+
+                    if not paidText:
+                        paidText = 'Мероприятий не найдено'
+                    if not freeText:
+                        freeText = 'Мероприятий не найдено'
+                    if not depositText:
+                        depositText = 'Мероприятий не найдено'
+                    if not donationText:
+                        donationText = 'Мероприятий не найдено'
+
+                    mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u> \n {paidText} \n\n <u>Бесплатно:</u> \n {freeText} \n\n <u>Депозит:</u> \n {depositText} \n\n <u>Донаты:</u> \n {donationText}'
+
+                    await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup)
+                else:
+                    await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
 
     @bot.message_handler(state=Game.question)
     async def send_text(message: types.Message, state: FSMContext):
@@ -272,9 +317,9 @@ async def main():
         else:
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
@@ -298,7 +343,7 @@ async def main():
                 markup.add(back)
 
                 await message.answer(
-                    f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')} Кто это на фотографии ?",
+                    f"{fmt.hide_link(startGame['question']['photo'])} Кто это на фотографии ?",
                     parse_mode=types.ParseMode.HTML)
             else:
                 markup = types.ReplyKeyboardMarkup(True, True)
@@ -309,9 +354,9 @@ async def main():
         else:
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
@@ -331,7 +376,7 @@ async def main():
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'НаЭтойНеделе'))
             await state.update_data(postType=2)
-        elif 'Топ на месяц' in message.text:
+        elif 'Топ' in message.text:
             requests.get(
                 'http://45.147.178.7:8000/api/stat/add/{0}/{1}'.format(message.chat.id, 'Топ'))
             await state.update_data(postType=3)
@@ -378,13 +423,17 @@ async def main():
                             'Ссылка на регистрацию', url=resp[i]['linkRegistr'])
                         markup.add(linkRegistr)
 
+                    photo = ''
+                    if resp[i]['photo']:
+                        photo = fmt.hide_link(resp[i]['photo'])
+
                     humans = ''
                     for k in range(0, len(resp[i]['human'])):
                         humans += '{0}'.format(resp[i]['human'][k]['name'])
                         if not k == (len(resp[i]['human']) - 1):
                             humans += ', '
                     await message.answer(
-                        f"{fmt.hide_link('https://get.wallhere.com/photo/2560x1600-px-ancient-architecture-castle-field-forest-Germany-hill-Hohenzollern-landscape-nature-sky-tower-trees-x-px-661906.jpg')}"
+                        f"{photo}"
                         f"<b>{resp[i]['title']}</b> \n\n"
                         f"{resp[i]['describe']} \n"
                         f"Местоположение: {resp[i]['location']} \n\n"
@@ -397,13 +446,13 @@ async def main():
         elif message.text.lower() == 'на главную':
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
-        elif message.text.lower() == 'поиск по геолокации':
+        elif message.text.lower() == 'поиск по геолокации 📍':
             await state.finish()
             title = 'Чтобы найти ближайшие к Вам кинотеатры, отправьте своё местоположение: \n● Нажмите 📎 \n● Выберите «Location»\n● Нажмите «Send my current location» (локацию можно изменить перед отправкой).'
             await message.answer(title)
@@ -461,9 +510,9 @@ async def main():
             )
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
@@ -476,9 +525,9 @@ async def main():
             )
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
-            search = types.KeyboardButton('Поиск мероприятия')
-            game = types.KeyboardButton('Игра «Угадай комика»')
-            setting = types.KeyboardButton('Мой профиль')
+            search = types.KeyboardButton('Поиск 🔍')
+            game = types.KeyboardButton('Игра 🎲')
+            setting = types.KeyboardButton('Профиль 🤖')
             title = 'Привет, чего ты хочешь ?'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
