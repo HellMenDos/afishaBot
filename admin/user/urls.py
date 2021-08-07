@@ -4,7 +4,7 @@ from user.views import UserOne, UserAddPoints, UserList, UserStatTop, UserCheck,
 
 
 urlpatterns = [
-    url('user/reg/(?P<token>[0-9а-яА-Яa-zA-Z]+)/(?P<city>[0-9а-яА-Яa-zA-Z]+)/?$',
+    url('user/reg/?$',
         UserOne.as_view()),
     url('user/get/(?P<token>[0-9а-яА-Яa-zA-Z]+)/?$',
         UserGetByToken.as_view()),

@@ -5,7 +5,7 @@ from user.models import User, Actions, Idols, Push, Stat
 from user.serilizers import UserSerializer, UserListSerializer, ActionsSerializer, ActionsListSerializer, IdolsSerializer, IdolsListSerializer, StatSerializer
 from rest_framework.response import Response
 from index.models import City, Game, Human, Posts
-from index.serilizers import PostSerializer
+from index.serilizers import PostSerializer, GameSerializer
 from django.db.models import F
 import random
 import requests
@@ -47,10 +47,12 @@ class UserOne(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def get(self, request, token, city):
+    def post(self, request):
+        token = request.data['token']
+        city = request.data['city']
         data = User.objects.filter(token=token).first()
         if data:
-            print('hello')
+
             cityId = City.objects.filter(name=city).first().id
             User.objects.filter(token=token).update(location=cityId)
             return Response(data={"status": "success"})
@@ -91,20 +93,23 @@ class GameStart(generics.ListAPIView):
 
     def get(self, request, token, code):
         userId = User.objects.filter(token=token).first().id
-        getGameQuestion = Game.objects.filter(
-            photo='') if code else Game.objects.filter(question='')
-        randId = random.randint(1, len(getGameQuestion))
+
+        getGameQuestion = Game.objects.filter(question='') if bool(
+            int(code)) else Game.objects.filter(photo='')
+
+        randId = getGameQuestion.order_by('?').first()
         getAction = Actions.objects.filter(user=userId)
         if getAction:
-            getAction.update(question=randId)
+            getAction.update(question=randId.id)
             serData = ActionsListSerializer(
                 Actions.objects.filter(user=userId).first()).data
             return Response(data=serData)
         else:
-            saveData = ActionsSerializer({"user": userId, "question": randId})
+            saveData = ActionsSerializer(
+                data={"user": userId, "question": randId.id})
             if saveData.is_valid():
                 saveData.save()
-                return Response(data=saveData.data)
+                return Response(data={"question": GameSerializer(randId).data})
             else:
                 return Response(data=saveData.errors)
 
@@ -185,21 +190,25 @@ class Send(generics.ListAPIView):
     def get(self, request, id):
         getData = Push.objects.get(pk=id)
         getAllUsers = User.objects.filter(location=getData.city)
-
+        datass = []
         for i in range(0, len(getAllUsers)):
             method = "sendMessage"
             token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
             url = f"https://api.telegram.org/bot{token}/{method}"
             text = f'<b>{getData.title}</b> \n\n{getData.describe}'
+
             if getData.photo:
-                text += f'{fmt.hide_link(getData.photo)}'
+                urlPhoto = 'http://127.0.0.1:8000/media/{0}'.format(
+                    getData.photo)
+                text += f'{fmt.hide_link(urlPhoto)}'
 
             data = {"chat_id": getAllUsers[i].token,
                     "text": text,
                     'parse_mode': types.ParseMode.HTML
                     }
-            requests.post(url, data=data)
-        return Response(status=200)
+            res = requests.post(url, data=data)
+            datass.append(res.json())
+        return Response(data=datass)
 
 
 class StatAdd(generics.ListAPIView):
@@ -222,43 +231,65 @@ class SendIdolsPush(generics.ListAPIView):
 
     def get(self, request):
         instance = Posts.objects.filter(sended=False)
+        # .filter(sended=False)
+        datass = []
         for j in range(0, len(instance)):
             for i in range(0, len(instance[j].human.all())):
                 idolId = instance[j].human.all()[i].id
+
                 userToken = requests.get(
                     f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
-                method = "sendMessage"
-                token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
-                url = f"https://api.telegram.org/bot{token}/{method}"
+                if userToken:
+                    method = "sendMessage"
+                    token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+                    url = f"https://api.telegram.org/bot{token}/{method}"
 
-                markup = []
-                if instance[j].link:
-                    markup.add(
-                        [{'text': 'Ссылка на покупку', 'url': instance[j].link}])
-                if instance[j].linkForChat:
-                    markup.add(
-                        [{'text': 'Ссылка на чат', 'url': instance[j].linkForChat}])
-                if instance[j].linkRegistr:
-                    markup.add(
-                        [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
-                photo = ''
-                if instance[j].photo:
-                    photo = fmt.hide_link(instance[j].photo)
+                    markup = []
+                    if instance[j].link:
+                        markup.append(
+                            [{'text': 'Ссылка на покупку', 'url': instance[j].link}])
+                    if instance[j].linkForChat:
+                        markup.append(
+                            [{'text': 'Ссылка на чат', 'url': instance[j].linkForChat}])
+                    if instance[j].linkRegistr:
+                        markup.append(
+                            [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
 
-                data = {"chat_id": userToken['user'],
-                        "text": f"{photo}"
-                        f"<b>{instance[j].title}</b> \n\n"
-                        f"{instance[j].describe} \n"
-                        f"Местоположение: {instance[j].location} \n\n"
-                        f"Начало:  <u>{str(instance[j].timeStart).split('T')[0]}</u>\n"
-                        f"Вход:  <u>{str(instance[j].timeEnd).split('T')[0]}</u>\n\n"
-                        f"Цена: {str(instance[j].cost) + ' р.' if instance[j].cost else 'Бесплатно'} \n",
-                        'parse_mode': types.ParseMode.HTML,
-                        'reply_markup': json.dumps({'inline_keyboard': [markup],
-                                                    'resize_keyboard': True,
-                                                    'one_time_keyboard': True,
-                                                    'selective': True})
-                        }
-                requests.post(url, data=data)
+                    photo = ''
+                    if instance[j].photo:
+                        photo = 'http://127.0.0.1:8000/media/{0}'.format(
+                            instance[j].photo)
+                    if instance[j].costType == 0:
+                        cost = str(instance[j].cost) + \
+                            ' р.' if instance[j].cost else 'Бесплатно'
+                    elif instance[j].costType == 1:
+                        cost = 'Депозит в размере ' + \
+                            str(instance[j].cost) + \
+                            ' р.' if instance[j].cost else 'Бесплатно'
+                    elif instance[j].costType == 2:
+                        cost = f"Донат (любая купюра мин: {instance[j].cost} р.)"
+
+                    humans = ''
+                    for k in range(0, len(instance[j].human.all())):
+                        humans += '{0}'.format(instance[j].human.all()[k].name)
+                        if not k == (len(instance[j].human.all()) - 1):
+                            humans += ', '
+
+                    data = {"chat_id": userToken['user'],
+                            "text": f"<b>{instance[j].title}</b> {fmt.hide_link(photo)}\n\n"
+                            f"{instance[j].describe} \n"
+                            f"Местоположение: {instance[j].location} \n\n"
+                            f"Начало:  <u>{str(instance[j].timeStart).split('+')[0]}</u>\n"
+                            f"Вход:  <u>{str(instance[j].timeEnd).split('+')[0]}</u>\n\n"
+                            f"Выступает: {humans} \n"
+                            f"Цена: {cost} \n",
+                            'parse_mode': types.ParseMode.HTML,
+                            'reply_markup': json.dumps({'inline_keyboard': markup,
+                                                        'resize_keyboard': True,
+                                                        'one_time_keyboard': True,
+                                                        'selective': True})
+                            }
+                    res = requests.post(url, data=data)
+                    datass.append(res.json())
         instance.update(sended=True)
-        return Response(data={})
+        return Response(data=datass)

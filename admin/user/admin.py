@@ -22,11 +22,13 @@ class ActionsAdmin(admin.ModelAdmin):
 @admin.register(Idols)
 class IdolsAdmin(admin.ModelAdmin):
     filter_horizontal = ('humans',)
+    list_filter = ('user',)
 
 
 @admin.register(Push)
 class PushAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'describe')
+    list_display = ('id', 'title', 'describe', 'city')
+    list_filter = ('city',)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         context = {}

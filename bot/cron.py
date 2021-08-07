@@ -4,9 +4,10 @@ import requests
 
 
 def job():
-    requests.get('http://admin:8000/api/send/idols/')
+    requests.get('http://server:8000/api/send/idols/')
 
 
+# schedule.every(1).minutes.do(job)
 schedule.every().hour.do(job)
 
 while True:

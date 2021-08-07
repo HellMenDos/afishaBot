@@ -73,10 +73,10 @@ class PostsGetCount(generics.ListAPIView):
             timeStart__year=date.year, timeStart__month=date.month, timeStart__day=date.day))
         tomorrow = len(data.filter(timeStart__year=date.year,
                                    timeStart__month=date.month, timeStart__day=date.day + 1))
-        weekDate = datetime.date.today() + datetime.timedelta(days=1)
-        week = date + datetime.timedelta(days=7)
+        weekDate = datetime.date.today() - datetime.timedelta(days=2)
+        week = datetime.date.today() + datetime.timedelta(days=6)
         weekCount = len(data.filter(
-            timeStart__range=[week.strftime('%Y-%m-%d'), weekDate.strftime('%Y-%m-%d')]))
+            timeStart__range=[weekDate.strftime('%Y-%m-%d'), week.strftime('%Y-%m-%d')]))
         best = len(data.filter(theBest=True))
         return Response(data={'tooday': tooday, 'tomorrow': tomorrow, 'week': weekCount, 'best': best})
 
@@ -98,10 +98,10 @@ class PostsGetWithTypes(generics.ListAPIView):
             dt = data.filter(timeStart__year=date.year,
                              timeStart__month=date.month, timeStart__day=date.day + 1)
         elif int(day) == 2:
-            weekDate = datetime.date.today() + datetime.timedelta(days=1)
-            week = date + datetime.timedelta(days=7)
+            weekDate = datetime.date.today() - datetime.timedelta(days=2)
+            week = date + datetime.timedelta(days=6)
             dt = data.filter(
-                timeStart__range=[week.strftime('%Y-%m-%d'), weekDate.strftime('%Y-%m-%d')])
+                timeStart__range=[weekDate.strftime('%Y-%m-%d'), week.strftime('%Y-%m-%d')])
         else:
             dt = data.filter(theBest=True)
 

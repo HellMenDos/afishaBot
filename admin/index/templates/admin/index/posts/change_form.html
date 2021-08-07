@@ -1,8 +1,21 @@
 {% extends "admin/change_form.html" %}
 
 {% block field_sets %}
-{% if create %}
 
+<div>
+  <h4>Чтобы вставить ссылку в ваш пост вы должны взять эту строку</h4>
+  </br>
+  <code>
+  &lt;a href="ВАША ССЫЛКА"&gt;ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ&lt;/a&gt; 
+  </code>
+  <br>
+  <h5>
+  и заменить "ВАША ССЫЛКА" на вашу ссылку, "ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ" на ваш текст
+  </h5>
+  </br>
+</div>
+
+{% if create %}
 {% if status %}
     {% if not paid %}
     <input type="button" value="Одобрить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
@@ -36,7 +49,5 @@
   }
 
 </script>
-<p>Чтобы вставить ссылку в ваш пост вы должны взять эту строку </br><plaintext><a href="ВАША ССЫЛКА">ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ</a> </plaintext><br>
-  и заменить "ВАША ССЫЛКА" на вашу ссылку, "ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ" на ваш текст
- </p>
+
 {% endblock %}

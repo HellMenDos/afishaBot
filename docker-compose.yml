@@ -4,8 +4,22 @@ services:
     admin:
         build:
             context: ./admin
+        volumes:
+            - ./admin:/admin
+            - static_volume:/admin/files/static
+            - media_volume:/admin/files/media
+        networks:
+            - union-network
+    server:
+        build:
+            context: ./nginx
+        volumes:
+            - static_volume:/admin/files/static
+            - media_volume:/admin/files/media
         ports:
-            - 8000:8000
+            - 80:8000
+        depends_on:
+            - admin
         networks:
             - union-network
 
@@ -15,7 +29,12 @@ services:
         networks:
             - union-network
         depends_on:
+            - server
             - admin
-            
+ 
+volumes:
+    static_volume:
+    media_volume:
+              
 networks:
     union-network:

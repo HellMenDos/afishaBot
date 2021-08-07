@@ -23,8 +23,9 @@ class HumanAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     search_fields = ('title__startswith',)
     list_display = ('id', 'title', 'describe',
-                    'typeOfPost', 'timeStart', 'paid')
-    list_filter = ('human', 'typeOfPost', 'paid', 'location')
+                    'typeOfPost', 'timeStart', 'paid', 'theBest', 'location', 'costType')
+    list_filter = ('human', 'typeOfPost', 'paid', 'location',
+                   'sended', 'theBest', 'timeStart', 'costType')
     change_links = ('human', 'typeOfPost')
     readonly_fields = ('paid',)
     filter_horizontal = ('human',)
