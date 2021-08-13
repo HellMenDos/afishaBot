@@ -441,7 +441,7 @@ async def main():
             'https://telegramexpert.ru/api/post/types/{0}'.format(current_state.get('postType'))).json()
 
         # if message.text.lower() == 'бесплатные' or message.text.lower() == 'платные' or message.text.lower() == 'назад':
-        #     # {fmt.hide_link('http://127.0.0.1:8000{0}'.format(resp[0]['photo']))}
+        #     # {fmt.hide_link('https://telegramexpert.ru{0}'.format(resp[0]['photo']))}
         #     markup = types.ReplyKeyboardMarkup(True, True)
         #     main = types.KeyboardButton('На главную')
         #     markup.add(main)
@@ -477,7 +477,7 @@ async def main():
                     photo = ''
                     if resp[i]['photo']:
                         photo = fmt.hide_link(
-                            'http://127.0.0.1:8000{0}'.format(resp[i]['photo']))
+                            'https://telegramexpert.ru{0}'.format(resp[i]['photo']))
 
                     if resp[i]['costType'] == 0:
                         cost = str(resp[i]['cost']) + \
