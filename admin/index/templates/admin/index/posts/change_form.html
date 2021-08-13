@@ -24,9 +24,9 @@
     {% endif %}
 {% else %}
     {% if not paid %}
-    <input type="button" value="Оплатить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <a href="https://t.me/KulikovVladimir">Чтобы оплатить пост свяжитесь с владельцем</a>
     {% else %}
-    <input type="button" value="Оплачено" disabled onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <h3>Пост одобрен</h3>
     {% endif %}
 {% endif %}
 {% endif %}
