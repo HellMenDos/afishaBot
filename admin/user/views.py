@@ -198,7 +198,7 @@ class Send(generics.ListAPIView):
             text = f'<b>{getData.title}</b> \n\n{getData.describe}'
 
             if getData.photo:
-                urlPhoto = 'http://127.0.0.1:8000/media/{0}'.format(
+                urlPhoto = 'https://telegramexpert.ru/media/{0}'.format(
                     getData.photo)
                 text += f'{fmt.hide_link(urlPhoto)}'
 
@@ -238,7 +238,7 @@ class SendIdolsPush(generics.ListAPIView):
                 idolId = instance[j].human.all()[i].id
 
                 userToken = requests.get(
-                    f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
+                    f'https://telegramexpert.ru/api/get/token/idols/{idolId}').json()
                 if userToken:
                     method = "sendMessage"
                     token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
@@ -257,7 +257,7 @@ class SendIdolsPush(generics.ListAPIView):
 
                     photo = ''
                     if instance[j].photo:
-                        photo = 'http://127.0.0.1:8000/media/{0}'.format(
+                        photo = 'https://telegramexpert.ru/media/{0}'.format(
                             instance[j].photo)
                     if instance[j].costType == 0:
                         cost = str(instance[j].cost) + \

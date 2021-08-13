@@ -182,7 +182,7 @@ async def main():
             back = types.KeyboardButton('На главную')
             markup.add(back)
             await message.answer(
-                f"{fmt.hide_link(startGame['question']['photo'])} Кто это на фотографии ?",
+                f"{fmt.hide_link('https://telegramexpert.ru{0}'.format(startGame['question']['photo']))} Кто это на фотографии ?",
                 parse_mode=types.ParseMode.HTML, reply_markup=markup)
             await Game.photo.set()
         # if message.text.lower() == 'Поиск 🔍':
@@ -371,7 +371,7 @@ async def main():
                 markup.add(back, skip)
 
                 await message.answer(
-                    f"{fmt.hide_link(startGame['question']['photo'])} Кто это на фотографии ?",
+                    f"{fmt.hide_link('https://telegramexpert.ru{0}'.format(startGame['question']['photo']))} Кто это на фотографии ?",
                     parse_mode=types.ParseMode.HTML, reply_markup=markup)
             elif message.text == 'Пропустить':
                 startGame = requests.get(
@@ -382,7 +382,7 @@ async def main():
                 markup.add(back, skip)
 
                 await message.answer(
-                    f"{fmt.hide_link(startGame['question']['photo'])} Кто это на фотографии ?",
+                    f"{fmt.hide_link('https://telegramexpert.ru{0}'.format(startGame['question']['photo']))} Кто это на фотографии ?",
                     parse_mode=types.ParseMode.HTML, reply_markup=markup)
             else:
                 markup = types.ReplyKeyboardMarkup(True, True)
