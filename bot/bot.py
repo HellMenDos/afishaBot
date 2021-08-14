@@ -214,7 +214,10 @@ async def main():
 
             photo = ''
             if post['photo']:
-                photo = fmt.hide_link(post['photo'])
+
+                photoHttp = post['photo'].split('/')[2:]
+                photoHTTPS = f"https://{'/'.join(data)}"
+                photo = fmt.hide_link(photoHTTPS)
 
             humans = ''
             for k in range(0, len(post['human'])):
