@@ -214,9 +214,7 @@ async def main():
 
             photo = ''
             if post['photo']:
-
-                photoHttp = post['photo'].split('/')[2:]
-                photoHTTPS = f"https://{'/'.join(data)}"
+                photoHTTPS = f"https:{post['photo'].split(':')[1]}"
                 photo = fmt.hide_link(photoHTTPS)
 
             humans = ''
@@ -244,7 +242,7 @@ async def main():
                 f"Вход:  <u>{post['timeEnd'].split('T')[0]} - {post['timeEnd'].split('T')[1][:-1]}</u>\n\n"
                 f"Выступает: {humans} \n"
                 f"Цена: {cost} \n",
-                parse_mode=types.ParseMode.HTML, reply_markup=markup)
+                parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=False)
 
         if message.text.lower() == 'поиск 🔍' or message.text == '/search':
             requests.get(
@@ -507,7 +505,7 @@ async def main():
                         f"Вход:  <u>{resp[i]['timeEnd'].split('T')[0]} - {resp[i]['timeEnd'].split('T')[1][:-1]}</u>\n\n"
                         f"Выступает: {humans} \n"
                         f"Цена: {cost} \n",
-                        parse_mode=types.ParseMode.HTML, reply_markup=markup)
+                        parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=False)
 
         elif message.text.lower() == 'на главную' or message.text.lower() == 'назад':
             await state.finish()
