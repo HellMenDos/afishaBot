@@ -193,7 +193,7 @@ class Send(generics.ListAPIView):
         datass = []
         for i in range(0, len(getAllUsers)):
             method = "sendMessage"
-            token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+            token = "1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc"
             url = f"https://api.telegram.org/bot{token}/{method}"
             text = f'<b>{getData.title}</b> \n\n{getData.describe}'
 
@@ -241,7 +241,7 @@ class SendIdolsPush(generics.ListAPIView):
                     f'https://telegramexpert.ru/api/get/token/idols/{idolId}').json()
                 if userToken:
                     method = "sendMessage"
-                    token = "1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c"
+                    token = "1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc"
                     url = f"https://api.telegram.org/bot{token}/{method}"
 
                     markup = []

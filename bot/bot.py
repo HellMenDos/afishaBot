@@ -31,7 +31,7 @@ async def set_commands(bot: Bot):
         types.BotCommand(command="/tomorrow",
                          description="Мероприятия на завтра ⌚️"),
         types.BotCommand(command="/game",
-                         description="Игра 🎲 "),
+                         description="Игры 🎲 "),
         types.BotCommand(command="/profile", description="Профиль 🤖 "),
     ]
     await bot.set_my_commands(commands)
@@ -39,7 +39,7 @@ async def set_commands(bot: Bot):
 
 async def main():
 
-    botInit = Bot(token='1921418522:AAGhuuELsBbOeby0OcjyjlGO5lqAbypl30c')
+    botInit = Bot(token='1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc')
     bot = Dispatcher(botInit, storage=MemoryStorage())
 
     # Start chat
@@ -51,9 +51,9 @@ async def main():
         if response.json()['have']:
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
         else:
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -63,7 +63,7 @@ async def main():
                 markup.add(types.KeyboardButton(cities[i]['name']))
             markup.add(types.KeyboardButton('Другое'))
 
-            title = 'Выбери город'
+            title = "Привет! ✋☺️  \n\nЯ Stand Up бот! \n\nЯ могу быстро и удобно искать Stand Up мероприятия в твоем городе. От больших концертов до открытых микрофонов. Платные и бесплатные. \n\n📌 Что я умею:\n\n▪️ Искать Stand Up мероприятия на сегодня, завтра, неделю и по геопозиции;\n▪️ Сохранять список твоих кумиров (в разделе профиль) и присылать уведомления об их концертах;\n▪️ Могу развлечь играми (угадай комика по фото или угадай комика по шутке)\n\nПодскажи, из какого ты города? 👇"
 
         await message.answer(title, reply_markup=markup)
     userId = 0
@@ -80,7 +80,7 @@ async def main():
             else:
                 idols = ' У вас нет кумиров'
 
-            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n \nКумиры: {3} \n\n <a href='https://t.me/KulikovVladimir'>«Написать владельцу»</a>".format(
+            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n \nКумиры: {3}\n\nТы можешь выбрать кумиров, и я буду сообщать об их концертах🤓👇  \n\n<a href='https://t.me/KulikovVladimir'>«Написать владельцу»</a>".format(
                 cities["token"], cities["location"]["name"], cities["points"], idols)
             markup = types.ReplyKeyboardMarkup(True, True)
             changeLocation = types.KeyboardButton('Поменять город')
@@ -113,17 +113,17 @@ async def main():
 
         cities = requests.get('https://telegramexpert.ru/api/city/get/').json()
         for i in range(0, len(cities)):
-            if message.text.lower() == cities[i]['name']:
+            if message.text.lower() == cities[i]['name'].lower():
                 create = requests.post(
                     'https://telegramexpert.ru/api/user/reg/', json={"token": message.chat.id, "city": message.text})
 
                 markup = types.ReplyKeyboardMarkup(True, True)
                 search = types.KeyboardButton('Поиск 🔍')
-                game = types.KeyboardButton('Игра 🎲')
+                game = types.KeyboardButton('Игры 🎲')
                 setting = types.KeyboardButton('Профиль 🤖')
                 markup.add(search, game, setting)
 
-                await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
+                await message.answer('Привет!☺️  \nВыбери, что тебя интересует?👇', reply_markup=markup)
 
         if message.text.lower() == 'назад' or message.text.lower() == 'на главную':
             create = requests.post(
@@ -131,11 +131,11 @@ async def main():
 
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
             markup.add(search, game, setting)
 
-            await message.answer('Привет, чего ты хочешь ?', reply_markup=markup)
+            await message.answer('Привет!☺️  \nВыбери, что тебя интересует?👇', reply_markup=markup)
 
         if message.text.lower() == 'другое':
             cities = requests.get(
@@ -149,10 +149,10 @@ async def main():
                     cityText += cities[i]['name'] + ' , '
                 markup.add(types.KeyboardButton(cities[i]['name']))
             markup.add(types.KeyboardButton('Другое'))
-            await message.answer('К сожалению я пока ищу только в {} но это ненадолго. Напиши из какого ты города и я уведомлю, когда смогу тебе помогать.'.format(
+            await message.answer('К сожалению я пока ищу только в {} 😔, но это ненадолго. Нажми на кнопку «Свой город» и напиши из какого ты города, и я уведомлю, когда смогу тебе помогать👇'.format(
                 cityText), reply_markup=markup)
 
-        if message.text.lower() == 'игра 🎲' or message.text == '/game':
+        if message.text.lower() == 'игры 🎲' or message.text == '/game':
             requests.get(
                 'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'ИграУгадайКомика'))
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -160,7 +160,7 @@ async def main():
             joke = types.KeyboardButton('Угадай комика по шутке')
 
             markup.add(photo, joke)
-            await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
+            await message.answer('Чтобы ответить на вопрос, необходимо ввести текстом имя и фамилию комика. \nЗа каждый ответ начисляются баллы, в зависимости от сложности. \nОбщее кол-во набранных балов можно посмотреть в разделе «Профиль» 🤖\n\nВыбери вид игры 🎲👇', reply_markup=markup)
 
         if message.text.lower() == 'угадай комика по шутке':
             requests.get(
@@ -254,11 +254,11 @@ async def main():
             tooday = types.KeyboardButton(f'Сегодня({count["tooday"]})')
             toomorrow = types.KeyboardButton(f'Завтра({count["tomorrow"]})')
             inWeek = types.KeyboardButton(f'Неделя({count["week"]})')
-            top = types.KeyboardButton(f'Топ ({count["best"]}) 🔝')
-            location = types.KeyboardButton('По гео')
+            top = types.KeyboardButton(f'Топ({count["best"]}) 🔝')
+            location = types.KeyboardButton('По гео 📍')
             back = types.KeyboardButton('Назад')
             markup.add(tooday, toomorrow, inWeek, top, location, back)
-            await message.answer('Выберите как вы хотите как вы хотите искать', reply_markup=markup)
+            await message.answer('Выбери, как ты хочешь искать🧐👇', reply_markup=markup)
             await Game.typesOfPosts.set()
 
         if message.text == '/tooday' or message.text == '/tomorrow':
@@ -346,9 +346,9 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
 
@@ -396,9 +396,9 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
 
@@ -413,7 +413,7 @@ async def main():
             requests.get(
                 'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'Завтра'))
             await state.update_data(postType=1)
-        elif 'На неделе' in message.text:
+        elif 'Неделя' in message.text:
             requests.get(
                 'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'НаЭтойНеделе'))
             await state.update_data(postType=2)
@@ -431,9 +431,9 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
 
@@ -511,14 +511,14 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
-        elif message.text.lower() == 'по гео':
+        elif message.text.lower() == 'по гео 📍':
             await state.finish()
-            title = 'Чтобы найти ближайшие к Вам кинотеатры, отправьте своё местоположение: \n● Нажмите 📎 \n● Выберите «Location»\n● Нажмите «Send my current location» (локацию можно изменить перед отправкой).'
+            title = 'Чтобы найти ближайшие к тебе мероприятия, отправь своё местоположение: \n● Нажми 📎 \n● Выбери «Геопозиция»\n● Нажми «Отправить свою геопозицию» (локацию можно изменить перед отправкой).'
             await message.answer(title)
         else:
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -576,9 +576,9 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
 
@@ -586,9 +586,9 @@ async def main():
             await state.finish()
             markup = types.ReplyKeyboardMarkup(True, True)
             search = types.KeyboardButton('Поиск 🔍')
-            game = types.KeyboardButton('Игра 🎲')
+            game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            title = 'Привет, чего ты хочешь ?'
+            title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
             markup.add(search, game, setting)
             await message.answer(title, reply_markup=markup)
         else:

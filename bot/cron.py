@@ -4,7 +4,7 @@ import requests
 
 
 def job():
-    requests.get('http://server:8000/api/send/idols/')
+    requests.get('https://telegramexpert.ru/api/send/idols/')
 
 
 # schedule.every(1).minutes.do(job)
