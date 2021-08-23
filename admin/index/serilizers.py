@@ -1,11 +1,18 @@
 from rest_framework import serializers
-from index.models import City, TypeOfPosts, Human, Posts, Game
+from index.models import City, TypeOfPosts, Human, Posts, Game, CityType
 
 
 class CitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = City
+        fields = '__all__'
+
+
+class CityTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CityType
         fields = '__all__'
 
 

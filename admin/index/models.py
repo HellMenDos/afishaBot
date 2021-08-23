@@ -17,6 +17,18 @@ class City(models.Model):
         verbose_name_plural = 'Города'
 
 
+class CityType(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название города')
+    count = models.IntegerField(verbose_name='Количество вводов')
+
+    def __str__(self):
+        return f'({self.name})'
+
+    class Meta:
+        verbose_name = 'Города пользователей'
+        verbose_name_plural = 'Города пользователей'
+
+
 class TypeOfPosts(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название типа поста')
     describe = models.TextField(verbose_name='Описание типа')
@@ -52,6 +64,8 @@ class Posts(models.Model):
     title = models.CharField(max_length=100, verbose_name='Оглавление поста')
     describe = models.TextField(verbose_name='Описание поста')
     location = models.CharField(max_length=200, verbose_name='Местоположение')
+    city = models.ForeignKey(
+        City, on_delete=models.DO_NOTHING, null=True, verbose_name="Город")
     cost = models.IntegerField(default=0, blank=True,
                                verbose_name='цена (р)')
     costType = models.IntegerField(
