@@ -2,7 +2,21 @@
 
 {% block field_sets %}
 
+<div>
+  <h4>Чтобы вставить ссылку в ваш пост вы должны взять эту строку</h4>
+  </br>
+  <code>
+  &lt;a href="ВАША ССЫЛКА"&gt;ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ&lt;/a&gt; 
+  </code>
+  <br>
+  <h5>
+  и заменить "ВАША ССЫЛКА" на вашу ссылку, "ТЕКСТ КОТОРЫЙ БУДЕТ ВЕСТИ ПО ССЫЛКЕ" на ваш текст
+  </h5>
+  </br>
+</div>
+
 <script>
+
   function Send(data) {
     let url = document.location.href.split('/').slice(0,3).join('/')
     fetch(`${url}/api/push/send/${data}/`).then((e) => {

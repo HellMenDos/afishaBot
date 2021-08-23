@@ -178,7 +178,7 @@ class IdolsGetToken(generics.ListAPIView):
     def get(self, request, id):
         data = Idols.objects.filter(humans__in=[id]).first()
         if data:
-            return Response(data={"user": data.user.token})
+            return Response(data={"user": data.user.token, 'location': data.user.location.id})
         else:
             return Response(data={})
 
@@ -200,7 +200,7 @@ class Send(generics.ListAPIView):
             if getData.photo:
                 urlPhoto = 'https://telegramexpert.ru/media/{0}'.format(
                     getData.photo)
-                text += f'{fmt.hide_link(urlPhoto)}'
+                text = f'{fmt.hide_link(urlPhoto)}' + text
 
             data = {"chat_id": getAllUsers[i].token,
                     "text": text,
@@ -238,58 +238,60 @@ class SendIdolsPush(generics.ListAPIView):
                 idolId = instance[j].human.all()[i].id
 
                 userToken = requests.get(
-                    f'https://telegramexpert.ru/api/get/token/idols/{idolId}').json()
+                    f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
                 if userToken:
-                    method = "sendMessage"
-                    token = "1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc"
-                    url = f"https://api.telegram.org/bot{token}/{method}"
+                    if userToken['location'] == instance[j].city.id:
+                        method = "sendMessage"
+                        token = "1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc"
+                        url = f"https://api.telegram.org/bot{token}/{method}"
 
-                    markup = []
-                    if instance[j].link:
-                        markup.append(
-                            [{'text': 'Ссылка на покупку', 'url': instance[j].link}])
-                    if instance[j].linkForChat:
-                        markup.append(
-                            [{'text': 'Ссылка на чат', 'url': instance[j].linkForChat}])
-                    if instance[j].linkRegistr:
-                        markup.append(
-                            [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
+                        markup = []
+                        if instance[j].link:
+                            markup.append(
+                                [{'text': 'Ссылка на покупку', 'url': instance[j].link}])
+                        if instance[j].linkForChat:
+                            markup.append(
+                                [{'text': 'Ссылка на чат', 'url': instance[j].linkForChat}])
+                        if instance[j].linkRegistr:
+                            markup.append(
+                                [{'text': 'Ссылка на регистрацию', 'url': instance[j].linkRegistr}])
 
-                    photo = ''
-                    if instance[j].photo:
-                        photo = 'https://telegramexpert.ru/media/{0}'.format(
-                            instance[j].photo)
-                    if instance[j].costType == 0:
-                        cost = str(instance[j].cost) + \
-                            ' р.' if instance[j].cost else 'Бесплатно'
-                    elif instance[j].costType == 1:
-                        cost = 'Депозит в размере ' + \
-                            str(instance[j].cost) + \
-                            ' р.' if instance[j].cost else 'Бесплатно'
-                    elif instance[j].costType == 2:
-                        cost = f"Донат (любая купюра мин: {instance[j].cost} р.)"
+                        photo = ''
+                        if instance[j].photo:
+                            photo = 'https://telegramexpert.ru/media/{0}'.format(
+                                instance[j].photo)
+                        if instance[j].costType == 0:
+                            cost = str(instance[j].cost) + \
+                                ' р.' if instance[j].cost else 'Бесплатно'
+                        elif instance[j].costType == 1:
+                            cost = 'Депозит в размере ' + \
+                                str(instance[j].cost) + \
+                                ' р.' if instance[j].cost else 'Бесплатно'
+                        elif instance[j].costType == 2:
+                            cost = f"Донат (любая купюра мин: {instance[j].cost} р.)"
 
-                    humans = ''
-                    for k in range(0, len(instance[j].human.all())):
-                        humans += '{0}'.format(instance[j].human.all()[k].name)
-                        if not k == (len(instance[j].human.all()) - 1):
-                            humans += ', '
+                        humans = ''
+                        for k in range(0, len(instance[j].human.all())):
+                            humans += '{0}'.format(
+                                instance[j].human.all()[k].name)
+                            if not k == (len(instance[j].human.all()) - 1):
+                                humans += ', '
 
-                    data = {"chat_id": userToken['user'],
-                            "text": f"<b>{instance[j].title}</b> {fmt.hide_link(photo)}\n\n"
-                            f"{instance[j].describe} \n"
-                            f"Местоположение: {instance[j].location} \n\n"
-                            f"Начало:  <u>{str(instance[j].timeStart).split('+')[0]}</u>\n"
-                            f"Вход:  <u>{str(instance[j].timeEnd).split('+')[0]}</u>\n\n"
-                            f"Выступает: {humans} \n"
-                            f"Цена: {cost} \n",
-                            'parse_mode': types.ParseMode.HTML,
-                            'reply_markup': json.dumps({'inline_keyboard': markup,
-                                                        'resize_keyboard': True,
-                                                        'one_time_keyboard': True,
-                                                        'selective': True})
-                            }
-                    res = requests.post(url, data=data)
-                    datass.append(res.json())
+                        data = {"chat_id": userToken['user'],
+                                "text": f"<b>{instance[j].title}</b> {fmt.hide_link(photo)}\n\n"
+                                f"{instance[j].describe} \n"
+                                f"Местоположение: {instance[j].location} \n\n"
+                                f"Начало:  <u>{str(instance[j].timeStart).split('+')[0]}</u>\n"
+                                f"Вход:  <u>{str(instance[j].timeEnd).split('+')[0]}</u>\n\n"
+                                f"Выступает: {humans} \n"
+                                f"Цена: {cost} \n",
+                                'parse_mode': types.ParseMode.HTML,
+                                'reply_markup': json.dumps({'inline_keyboard': markup,
+                                                            'resize_keyboard': True,
+                                                            'one_time_keyboard': True,
+                                                            'selective': True})
+                                }
+                        res = requests.post(url, data=data)
+                        datass.append(res.json())
         instance.update(sended=True)
         return Response(data=datass)

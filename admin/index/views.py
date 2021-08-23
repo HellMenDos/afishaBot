@@ -1,20 +1,37 @@
 from django.shortcuts import render
 from rest_framework import generics
+import requests
 
-from index.models import City, TypeOfPosts, Human, Posts, Game
-from index.serilizers import CitySerializer, TypeOfPostsSerializer, HumanSerializer, PostSerializer, GameSerializer
+from index.models import City, TypeOfPosts, Human, Posts, Game, CityType
+from index.serilizers import CitySerializer, TypeOfPostsSerializer, HumanSerializer, PostSerializer, GameSerializer, CityTypeSerializer
 from rest_framework.response import Response
 from geopy.geocoders import Nominatim
 from geopy.distance import great_circle
 import math
 import datetime
+from django.db.models import F
 import time
+
 nom = Nominatim(user_agent="http")
 
 
 class CityList(generics.ListCreateAPIView):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+
+
+class CityTypeView(generics.ListCreateAPIView):
+    queryset = CityType.objects.all()
+    serializer_class = CityTypeSerializer
+
+    def post(self, request):
+        get_data = CityType.objects.filter(name=request.data['city'])
+        if get_data:
+            get_data.update(count=F("count") + 1)
+        else:
+            CityType.objects.create(name=request.data['city'], count=1)
+
+        return Response(status=201)
 
 
 class TypeOfPostsList(generics.ListCreateAPIView):
@@ -63,9 +80,13 @@ class PostsGetCount(generics.ListAPIView):
     queryset = Posts.objects.all()
     serializer_class = PostSerializer
 
-    def get(self, request):
+    def get(self, request, id):
+        cityId = requests.get(
+            'http://127.0.0.1:8000/api/user/get/{0}'.format(id)).json()
+
         type = TypeOfPosts.objects.all().first().id
-        data = Posts.objects.filter(typeOfPost=type, paid=True)
+        data = Posts.objects.filter(
+            typeOfPost=type, city=cityId["location"]["id"], paid=True)
 
         date = datetime.date.today()
 
@@ -85,9 +106,13 @@ class PostsGetWithTypes(generics.ListAPIView):
     queryset = Posts.objects.all()
     serializer_class = PostSerializer
 
-    def get(self, request, day):
+    def get(self, request, day, id):
+        cityId = requests.get(
+            'http://127.0.0.1:8000/api/user/get/{0}'.format(id)).json()
+
         type = TypeOfPosts.objects.all().first().id
-        data = Posts.objects.filter(typeOfPost=type, paid=True)
+        data = Posts.objects.filter(
+            typeOfPost=type, city=cityId["location"]["id"], paid=True)
 
         date = datetime.date.today()
 
@@ -144,11 +169,8 @@ class UpdatePaid(generics.ListAPIView):
     serializer_class = PostSerializer
 
     def get(self, request, id, paid):
-        if paid:
-            data = Posts.objects.filter(id=id).update(paid=True)
-            return Response(data={"status": "ok"})
-        else:
-            return Response(data={"status": "false"})
+        data = Posts.objects.filter(id=id).update(paid=paid)
+        return Response(data={"status": "ok"})
 
 
 class PostsGetWithBest(generics.ListAPIView):
@@ -159,6 +181,19 @@ class PostsGetWithBest(generics.ListAPIView):
         data = Posts.objects.filter(theBest=slug)
         serializeData = PostSerializer(data, many=True)
         return Response(data=serializeData.data)
+
+
+class SendMap(generics.ListAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = PostSerializer
+
+    def get(self, request, id, chatId):
+        post = Posts.objects.get(pk=id)
+        coord = nom.geocode(post.location)
+        token = "1882761591:AAHEJh8otU_roGCQ_c0fOKarGFvxl4Wgvoc"
+        requests.post(
+            f'https://api.telegram.org/bot{token}/sendlocation?chat_id={chatId}&latitude={coord.latitude}&longitude={coord.longitude}')
+        return Response(status=201)
 
 
 class PostsCoord(generics.ListAPIView):
@@ -173,14 +208,14 @@ class PostsCoord(generics.ListAPIView):
         for i in range(0, len(data)):
             coord = nom.geocode(data[i].location)
 
-            if coord:
+            if coord.latitude:
                 coordData.append((math.floor(great_circle(
                     userData, (coord.latitude, coord.longitude)).meters), PostSerializer(data[i]).data))
             else:
                 coordData.append((99999999, PostSerializer(data[i]).data))
 
-            coordData.sort()
-            finalData = coordData[0:4]
+            coordData.sort(key=lambda data: data[0])
+            finalData = coordData[0:3]
         return Response(data=finalData)
 
 

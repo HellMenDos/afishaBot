@@ -1,5 +1,5 @@
 from django.contrib import admin
-from index.models import City, TypeOfPosts, Human, Posts, Game
+from index.models import City, TypeOfPosts, Human, Posts, Game, CityType
 
 admin.site.site_header = 'Админка бота'
 
@@ -17,6 +17,11 @@ class TypeOfPostsAdmin(admin.ModelAdmin):
 @admin.register(Human)
 class HumanAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'describe')
+
+
+@admin.register(CityType)
+class CityTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'count')
 
 
 @admin.register(Posts)

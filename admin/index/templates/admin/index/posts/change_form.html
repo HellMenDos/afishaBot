@@ -18,9 +18,9 @@
 {% if create %}
 {% if status %}
     {% if not paid %}
-    <input type="button" value="Одобрить" onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <input type="button" value="Одобрить" onclick="Approove({{id}},1)" class="default" name="send" style="width:100%">
     {% else %}
-    <input type="button" value="Одобрено" disabled onclick="Approove({{id}},{{send}})" class="default" name="send" style="width:100%">
+    <input type="button" value="Скрыть пост" onclick="Approove({{id}},0)" class="default" name="send" style="width:100%">
     {% endif %}
 {% else %}
     {% if not paid %}
