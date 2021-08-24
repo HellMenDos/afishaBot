@@ -653,7 +653,7 @@ async def main():
         print(message)
         resp = requests.get('https://telegramexpert.ru/api/post/coord/{0}/{1}'.format(
             message.location.latitude, message.location.longitude)).json()
-        title = f'<b>Ближайшие мероприятия:</b> \n'
+        title = f'<b>Ближайшие мероприятия \n (можешь сразу открыть несколько постов):</b> \n'
         for i in range(0, len(resp)):
             cost = ''
             if resp[i][1]['cost'] == 0:

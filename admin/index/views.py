@@ -208,7 +208,7 @@ class PostsCoord(generics.ListAPIView):
         for i in range(0, len(data)):
             coord = nom.geocode(data[i].location)
 
-            if coord.latitude:
+            if coord:
                 coordData.append((math.floor(great_circle(
                     userData, (coord.latitude, coord.longitude)).meters), PostSerializer(data[i]).data))
             else:

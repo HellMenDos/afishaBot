@@ -28,8 +28,8 @@ class CityTypeAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     search_fields = ('title__startswith',)
     list_display = ('id', 'title', 'describe',
-                    'typeOfPost', 'timeStart', 'paid', 'theBest', 'location', 'costType')
-    list_filter = ('human', 'typeOfPost', 'paid', 'location',
+                    'typeOfPost','city', 'timeStart', 'paid', 'theBest', 'location', 'costType')
+    list_filter = ('human','city', 'typeOfPost', 'paid', 'location',
                    'sended', 'theBest', 'timeStart', 'costType')
     change_links = ('human', 'typeOfPost')
     readonly_fields = ('paid',)
