@@ -262,7 +262,7 @@ async def main():
             inWeek = types.KeyboardButton(f'Неделя({count["week"]})')
             top = types.KeyboardButton(f'Топ({count["best"]}) 🔝')
             location = types.KeyboardButton('По гео 📍')
-            back = types.KeyboardButton('Назад')
+            back = types.KeyboardButton('На главную')
             markup.add(tooday, toomorrow, inWeek, top, location, back)
             await message.answer('Выбери, как ты хочешь искать🧐👇', reply_markup=markup)
             await Game.typesOfPosts.set()
@@ -285,17 +285,17 @@ async def main():
                 for i in range(0, len(resp)):
                     if resp[i]['cost'] == 0:
                         freeText = freeText + \
-                            f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                            f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                     else:
                         if resp[i]['costType'] == 0:
                             paidText = paidText + \
-                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         if resp[i]['costType'] == 1:
                             depositText = depositText + \
-                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         if resp[i]['costType'] == 2:
                             donationText = donationText + \
-                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
                 if not paidText:
                     paidText = 'Мероприятий не найдено'
@@ -306,7 +306,7 @@ async def main():
                 if not donationText:
                     donationText = 'Мероприятий не найдено'
 
-                mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u> \n {paidText} \n\n <u>Бесплатно:</u> \n {freeText} \n\n <u>Депозит:</u> \n {depositText} \n\n <u>Донаты:</u> \n {donationText}'
+                mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
 
                 await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
             else:
@@ -437,7 +437,7 @@ async def main():
                 await state.update_data(postType=0)
             elif '/profile' in message.text or '/search' in message.text or '/tooday' in message.text or '/tomorrow' in message.text or '/game' in message.text or '/start' in message.text:
                 await message.answer('Чтобы использовать команды нажмите кнопку назад')
-            elif message.text.lower() == 'назад':
+            elif message.text.lower() == 'на главную':
                 await state.finish()
                 markup = types.ReplyKeyboardMarkup(True, True)
                 search = types.KeyboardButton('Поиск 🔍')
@@ -523,7 +523,7 @@ async def main():
                             f"Цена: {cost} \n",
                             parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=False)
 
-            elif message.text.lower() == 'на главную' or message.text.lower() == 'назад':
+            elif message.text.lower() == 'назад':
                 requests.get(
                     'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'ПоискМероприятия'))
                 markup = types.ReplyKeyboardMarkup(True, True)
@@ -536,7 +536,7 @@ async def main():
                 inWeek = types.KeyboardButton(f'Неделя({count["week"]})')
                 top = types.KeyboardButton(f'Топ({count["best"]}) 🔝')
                 location = types.KeyboardButton('По гео 📍')
-                back = types.KeyboardButton('Назад')
+                back = types.KeyboardButton('На главную')
                 markup.add(tooday, toomorrow, inWeek, top, location, back)
                 await message.answer('Выбери, как ты хочешь искать🧐👇', reply_markup=markup)
 
@@ -547,7 +547,8 @@ async def main():
             else:
                 markup = types.ReplyKeyboardMarkup(True, True)
                 main = types.KeyboardButton('На главную')
-                markup.add(main)
+                back = types.KeyboardButton('Назад')
+                markup.add(main, back)
 
                 if resp:
 
@@ -558,17 +559,17 @@ async def main():
                     for i in range(0, len(resp)):
                         if resp[i]['cost'] == 0:
                             freeText = freeText + \
-                                f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         else:
                             if resp[i]['costType'] == 0:
                                 paidText = paidText + \
-                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 1:
                                 depositText = depositText + \
-                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 2:
                                 donationText = donationText + \
-                                    f"\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
                     if not paidText:
                         paidText = 'Мероприятий не найдено'
@@ -579,7 +580,7 @@ async def main():
                     if not donationText:
                         donationText = 'Мероприятий не найдено'
 
-                    mainTitle = f'<b>Мероприятия \n(можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u> \n {paidText} \n\n <u>Бесплатно:</u> \n {freeText} \n\n <u>Депозит:</u> \n {depositText} \n\n <u>Донаты:</u> \n {donationText}'
+                    mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u> {paidText} \n\n <u>Бесплатно:</u> {freeText} \n\n <u>Депозит:</u> {depositText} \n\n <u>Донаты:</u> {donationText}'
 
                     await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
                 else:
@@ -653,7 +654,7 @@ async def main():
         print(message)
         resp = requests.get('https://telegramexpert.ru/api/post/coord/{0}/{1}'.format(
             message.location.latitude, message.location.longitude)).json()
-        title = f'<b>Ближайшие мероприятия \n (можешь сразу открыть несколько постов):</b> \n'
+        title = f'<b>Ближайшие мероприятия (можешь сразу открыть несколько постов):</b> \n'
         for i in range(0, len(resp)):
             cost = ''
             if resp[i][1]['cost'] == 0:
