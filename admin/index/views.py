@@ -82,7 +82,7 @@ class PostsGetCount(generics.ListAPIView):
 
     def get(self, request, id):
         cityId = requests.get(
-            'http://127.0.0.1:8000/api/user/get/{0}'.format(id)).json()
+            'https://telegramexpert.ru/api/user/get/{0}'.format(id)).json()
 
         type = TypeOfPosts.objects.all().first().id
         data = Posts.objects.filter(
@@ -108,7 +108,7 @@ class PostsGetWithTypes(generics.ListAPIView):
 
     def get(self, request, day, id):
         cityId = requests.get(
-            'http://127.0.0.1:8000/api/user/get/{0}'.format(id)).json()
+            'https://telegramexpert.ru/api/user/get/{0}'.format(id)).json()
 
         type = TypeOfPosts.objects.all().first().id
         data = Posts.objects.filter(

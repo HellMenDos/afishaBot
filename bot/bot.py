@@ -285,17 +285,17 @@ async def main():
                 for i in range(0, len(resp)):
                     if resp[i]['cost'] == 0:
                         freeText = freeText + \
-                            f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                            f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                     else:
                         if resp[i]['costType'] == 0:
                             paidText = paidText + \
-                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         if resp[i]['costType'] == 1:
                             depositText = depositText + \
-                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         if resp[i]['costType'] == 2:
                             donationText = donationText + \
-                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
                 if not paidText:
                     paidText = 'Мероприятий не найдено'
@@ -306,9 +306,16 @@ async def main():
                 if not donationText:
                     donationText = 'Мероприятий не найдено'
 
-                mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
+                mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
 
-                await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                #await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+
+                if len(mainTitle) > 4096:
+                    for x in range(0, len(mainTitle), 4096):
+                        await message.answer(mainTitle[x:x+4096], parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                        #bot.send_message(message.chat.id, info[x:x+4096])
+                else:
+                    await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
             else:
                 await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
 
@@ -436,7 +443,7 @@ async def main():
                     'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'Геолокация'))
                 await state.update_data(postType=0)
             elif '/profile' in message.text or '/search' in message.text or '/tooday' in message.text or '/tomorrow' in message.text or '/game' in message.text or '/start' in message.text:
-                await message.answer('Чтобы использовать команды нажмите кнопку назад')
+                await message.answer('Чтобы использовать команды нажмите кнопку - Назад либо На главную (если меню скрыто, нажмите «значек»)')
             elif message.text.lower() == 'на главную':
                 await state.finish()
                 markup = types.ReplyKeyboardMarkup(True, True)
@@ -544,7 +551,7 @@ async def main():
                 await state.finish()
                 title = 'Чтобы найти ближайшие к тебе мероприятия, отправь своё местоположение: \n● Нажми 📎 \n● Выбери «Геопозиция»\n● Нажми «Отправить свою геопозицию» (локацию можно изменить перед отправкой).'
                 await message.answer(title)
-            else:
+            elif '/profile' not in message.text or '/search' not in message.text or '/tooday' not in message.text or '/tomorrow' not in message.text or '/game' not in message.text or '/start' not in message.text:
                 markup = types.ReplyKeyboardMarkup(True, True)
                 main = types.KeyboardButton('На главную')
                 back = types.KeyboardButton('Назад')
@@ -559,17 +566,17 @@ async def main():
                     for i in range(0, len(resp)):
                         if resp[i]['cost'] == 0:
                             freeText = freeText + \
-                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                         else:
                             if resp[i]['costType'] == 0:
                                 paidText = paidText + \
-                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 1:
                                 depositText = depositText + \
-                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 2:
                                 donationText = donationText + \
-                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
                     if not paidText:
                         paidText = 'Мероприятий не найдено'
@@ -580,9 +587,16 @@ async def main():
                     if not donationText:
                         donationText = 'Мероприятий не найдено'
 
-                    mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u> {paidText} \n\n <u>Бесплатно:</u> {freeText} \n\n <u>Депозит:</u> {depositText} \n\n <u>Донаты:</u> {donationText}'
+                    mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n Платно: {paidText} \n\n Бесплатно: {freeText} \n\n Депозит: {depositText} \n\n Донаты: {donationText}'
 
-                    await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                    if len(mainTitle) > 4096:
+                        for x in range(0, len(mainTitle), 4096):
+                            await message.answer(mainTitle[x:x+4096], parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                            #bot.send_message(message.chat.id, info[x:x+4096])
+                    else:
+                        await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+
+                    #await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
                 else:
                     await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
     data = []
@@ -647,11 +661,11 @@ async def main():
             await message.answer(title, reply_markup=markup)
         else:
             data.append(message.text)
-            await message.answer('Успешно добавлено, чтобы применить изменения нажмите - Сохранить список')
+            await message.answer('Успешно добавлено, чтобы применить изменения нажмите - Сохранить список (если меню скрыто, нажмите «значек»)')
 
     @bot.message_handler(content_types=["location"])
     async def loc_handler(message):
-        print(message)
+        await message.answer('Извини, тебе придется подождать 20-30 секунд.\nМне надо время чтобы найти для тебя подходящие мероприятия 🤓')
         resp = requests.get('https://telegramexpert.ru/api/post/coord/{0}/{1}'.format(
             message.location.latitude, message.location.longitude)).json()
         title = f'<b>Ближайшие мероприятия (можешь сразу открыть несколько постов):</b> \n'

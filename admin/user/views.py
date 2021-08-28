@@ -238,7 +238,7 @@ class SendIdolsPush(generics.ListAPIView):
                 idolId = instance[j].human.all()[i].id
 
                 userToken = requests.get(
-                    f'http://127.0.0.1:8000/api/get/token/idols/{idolId}').json()
+                    f'https://telegramexpert.ru/api/get/token/idols/{idolId}').json()
                 if userToken:
                     if userToken['location'] == instance[j].city.id:
                         method = "sendMessage"
