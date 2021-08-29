@@ -25,10 +25,10 @@ class Game(StatesGroup):
 async def set_commands(bot: Bot):
     commands = [
         types.BotCommand(command="/start",
-                         description="Главная"),
+                         description="Главная ❗️"),
         types.BotCommand(command="/search", description="Поиск 🔍"),
         types.BotCommand(command="/tooday",
-                         description="Мероприятия на сегодня 😄"),
+                         description="Мероприятия на сегодня 🔥"),
         types.BotCommand(command="/tomorrow",
                          description="Мероприятия на завтра ⌚️"),
         types.BotCommand(command="/game",
@@ -55,8 +55,9 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
         else:
             markup = types.ReplyKeyboardMarkup(True, True)
             cities = requests.get(
@@ -82,15 +83,25 @@ async def main():
             else:
                 idols = ' У вас нет кумиров'
 
-            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n \nКумиры: {3}\n\nТы можешь выбрать кумиров и я сообщу об их концертах!  \nБудь внимателен, при каждом сохранении все кумиры обновляются. Выбирай всех за раз🤓👇  \n\n<a href='https://t.me/KulikovVladimir'>«Написать владельцу»</a>".format(
+            textAbout = "<b>Ваш профиль:</b>\n\nВаш уникальный номер: <u>{0}</u>\nВаш город: <u>{1}</u>\nВаше количество очков: <u>{2}</u>\n \nКумиры: {3} \n\n<a href='https://t.me/KulikovVladimir'>«Написать владельцу»</a>".format(
                 cities["token"], cities["location"]["name"], cities["points"], idols)
             markup = types.ReplyKeyboardMarkup(True, True)
             changeLocation = types.KeyboardButton('Поменять город')
-            setIdols = types.KeyboardButton('Выбрать кумиров')
-            markup.add(changeLocation, setIdols)
+            back = types.KeyboardButton('Назад')
+            markup.add(changeLocation, back)
             await message.answer(textAbout, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
 
-        if message.text.lower() == 'выбрать кумиров':
+        if message.text.lower() == 'выбрать кумиров ⭐':
+
+            cities = requests.get(
+                'https://telegramexpert.ru/api/user/get/{0}'.format(str(message.chat.id))).json()
+            idols = requests.get(
+                'https://telegramexpert.ru/api/user/idols/get/{0}'.format(cities['id'])).json()
+            if idols:
+                idols = ', '.join(idols)
+            else:
+                idols = ' У вас нет кумиров'
+
             cities = requests.get(
                 'https://telegramexpert.ru/api/human/get/').json()
             markup = types.ReplyKeyboardMarkup(True, True)
@@ -98,7 +109,10 @@ async def main():
             markup.add(types.KeyboardButton('Назад'))
             for i in range(0, len(cities)):
                 markup.add(types.KeyboardButton(cities[i]['name']))
-            title = 'Выбери кумиров'
+
+            title = 'Кумиры: {0}\n\nТы можешь Выбрать кумиров ⭐ и я сообщу об их концертах!  \nБудь внимателен, при каждом сохранении все кумиры обновляются. Выбирай всех за раз🤓👇'.format(
+                idols)
+
             await message.answer(title, reply_markup=markup)
             await Game.human.set()
 
@@ -123,7 +137,8 @@ async def main():
                 search = types.KeyboardButton('Поиск 🔍')
                 game = types.KeyboardButton('Игры 🎲')
                 setting = types.KeyboardButton('Профиль 🤖')
-                markup.add(search, game, setting)
+                setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
+                markup.add(search, game, setting, setIdols)
 
                 await message.answer('Привет!☺️  \nВыбери, что тебя интересует?👇', reply_markup=markup)
 
@@ -135,7 +150,8 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
-            markup.add(search, game, setting)
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
+            markup.add(search, game, setting, setIdols)
 
             await message.answer('Привет!☺️  \nВыбери, что тебя интересует?👇', reply_markup=markup)
 
@@ -162,8 +178,9 @@ async def main():
             markup = types.ReplyKeyboardMarkup(True, True)
             photo = types.KeyboardButton('Угадай комика по фотке')
             joke = types.KeyboardButton('Угадай комика по шутке')
+            back = types.KeyboardButton('Назад')
 
-            markup.add(photo, joke)
+            markup.add(photo, joke, back)
             await message.answer('Чтобы ответить на вопрос, необходимо ввести текстом имя и фамилию комика. \nЗа каждый ответ начисляются баллы, в зависимости от сложности. \nОбщее кол-во набранных балов можно посмотреть в разделе «Профиль» 🤖\n\nВыбери вид игры 🎲👇', reply_markup=markup)
 
         if message.text.lower() == 'угадай комика по шутке':
@@ -282,6 +299,11 @@ async def main():
                 freeText = ''
                 depositText = ''
                 donationText = ''
+
+                paidText2 = ''
+                freeText2 = ''
+                depositText2 = ''
+                donationText2 = ''
                 for i in range(0, len(resp)):
                     if resp[i]['cost'] == 0:
                         freeText = freeText + \
@@ -297,6 +319,21 @@ async def main():
                             donationText = donationText + \
                                 f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
+                for i in range(0, len(resp)):
+                    if resp[i]['cost'] == 0:
+                        freeText2 = freeText2 + \
+                            f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                    else:
+                        if resp[i]['costType'] == 0:
+                            paidText2 = paidText2 + \
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                        if resp[i]['costType'] == 1:
+                            depositText2 = depositText2 + \
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                        if resp[i]['costType'] == 2:
+                            donationText2 = donationText2 + \
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+
                 if not paidText:
                     paidText = 'Мероприятий не найдено'
                 if not freeText:
@@ -306,12 +343,21 @@ async def main():
                 if not donationText:
                     donationText = 'Мероприятий не найдено'
 
-                mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
+                if not paidText2:
+                    paidText2 = 'Мероприятий не найдено'
+                if not freeText2:
+                    freeText2 = 'Мероприятий не найдено'
+                if not depositText2:
+                    depositText2 = 'Мероприятий не найдено'
+                if not donationText2:
+                    donationText2 = 'Мероприятий не найдено'
 
-                #await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                # await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u>  {paidText2} \n\n <u>Бесплатно:</u>  {freeText2} \n\n <u>Депозит:</u>  {depositText2} \n\n <u>Донаты:</u>  {donationText2}'
 
                 if len(mainTitle) > 4096:
                     for x in range(0, len(mainTitle), 4096):
+                        mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
                         await message.answer(mainTitle[x:x+4096], parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
                         #bot.send_message(message.chat.id, info[x:x+4096])
                 else:
@@ -361,8 +407,9 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
             await message.answer(title, reply_markup=markup)
 
     @bot.message_handler(state=Game.photo)
@@ -374,7 +421,7 @@ async def main():
                 requests.get('https://telegramexpert.ru/api/user/add/points/{0}/{1}'.format(
                     message.chat.id, getHuman["question"]["points"]))
 
-                await message.answer('Праавильно, на ваш профиль зачислено {0} очков'.format(
+                await message.answer('Правильно, на ваш профиль зачислено {0} очков'.format(
                     getHuman["question"]["points"]))
 
                 startGame = requests.get(
@@ -411,8 +458,9 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
             await message.answer(title, reply_markup=markup)
 
     @bot.message_handler(state=Game.typesOfPosts)
@@ -443,15 +491,16 @@ async def main():
                     'https://telegramexpert.ru/api/stat/add/{0}/{1}'.format(message.chat.id, 'Геолокация'))
                 await state.update_data(postType=0)
             elif '/profile' in message.text or '/search' in message.text or '/tooday' in message.text or '/tomorrow' in message.text or '/game' in message.text or '/start' in message.text:
-                await message.answer('Чтобы использовать команды нажмите кнопку - Назад либо На главную (если меню скрыто, нажмите «значек»)')
+                await botInit.send_photo(message.chat.id, 'https://telegramexpert.ru/media/push/2021-08-28_21.39.48.jpg', caption='Чтобы использовать команды нажмите кнопку - Назад либо На главную (если меню скрыто, нажмите «значек»)')
             elif message.text.lower() == 'на главную':
                 await state.finish()
                 markup = types.ReplyKeyboardMarkup(True, True)
                 search = types.KeyboardButton('Поиск 🔍')
                 game = types.KeyboardButton('Игры 🎲')
                 setting = types.KeyboardButton('Профиль 🤖')
+                setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
                 title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-                markup.add(search, game, setting)
+                markup.add(search, game, setting, setIdols)
                 await message.answer(title, reply_markup=markup)
 
             current_state = await state.get_data()
@@ -558,11 +607,15 @@ async def main():
                 markup.add(main, back)
 
                 if resp:
-
                     paidText = ''
                     freeText = ''
                     depositText = ''
                     donationText = ''
+
+                    paidText2 = ''
+                    freeText2 = ''
+                    depositText2 = ''
+                    donationText2 = ''
                     for i in range(0, len(resp)):
                         if resp[i]['cost'] == 0:
                             freeText = freeText + \
@@ -573,10 +626,25 @@ async def main():
                                     f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 1:
                                 depositText = depositText + \
-                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
                             if resp[i]['costType'] == 2:
                                 donationText = donationText + \
                                     f"\n\n● {resp[i]['timeEnd'].split('T')[0]} {resp[i]['title']} {resp[i]['location']}\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
+
+                    for i in range(0, len(resp)):
+                        if resp[i]['cost'] == 0:
+                            freeText2 = freeText2 + \
+                                f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                        else:
+                            if resp[i]['costType'] == 0:
+                                paidText2 = paidText2 + \
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                            if resp[i]['costType'] == 1:
+                                depositText2 = depositText2 + \
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Депозит в размере {str(resp[i]['cost']) + ' р.' if resp[i]['cost'] else 'Бесплатно'} (Подробнее -> /i{resp[i]['id']})"
+                            if resp[i]['costType'] == 2:
+                                donationText2 = donationText2 + \
+                                    f"\n\n● {resp[i]['timeEnd'].split('T')[0]} <b>{resp[i]['title']}</b> <u>{resp[i]['location']}</u>\n Вход - Донат (любая купюра мин: {resp[i]['cost']} р.) (Подробнее -> /i{resp[i]['id']})"
 
                     if not paidText:
                         paidText = 'Мероприятий не найдено'
@@ -587,18 +655,28 @@ async def main():
                     if not donationText:
                         donationText = 'Мероприятий не найдено'
 
-                    mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n Платно: {paidText} \n\n Бесплатно: {freeText} \n\n Депозит: {depositText} \n\n Донаты: {donationText}'
+                    if not paidText2:
+                        paidText2 = 'Мероприятий не найдено'
+                    if not freeText2:
+                        freeText2 = 'Мероприятий не найдено'
+                    if not depositText2:
+                        depositText2 = 'Мероприятий не найдено'
+                    if not donationText2:
+                        donationText2 = 'Мероприятий не найдено'
+
+                    # await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
+                    mainTitle = f'<b>Мероприятия:</b> \n\n <u>Платно:</u>  {paidText2} \n\n <u>Бесплатно:</u>  {freeText2} \n\n <u>Депозит:</u>  {depositText2} \n\n <u>Донаты:</u>  {donationText2}'
 
                     if len(mainTitle) > 4096:
                         for x in range(0, len(mainTitle), 4096):
+                            mainTitle = f'<b>Мероприятия (можешь сразу открыть несколько постов):</b> \n\n <u>Платно:</u>  {paidText} \n\n <u>Бесплатно:</u>  {freeText} \n\n <u>Депозит:</u>  {depositText} \n\n <u>Донаты:</u>  {donationText}'
                             await message.answer(mainTitle[x:x+4096], parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
                             #bot.send_message(message.chat.id, info[x:x+4096])
                     else:
                         await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
-
-                    #await message.answer(mainTitle, parse_mode=types.ParseMode.HTML, reply_markup=markup, disable_web_page_preview=True)
                 else:
                     await message.answer('Извините пока таких мероприятий нет', reply_markup=markup)
+
     data = []
 
     @bot.message_handler(state=Game.city)
@@ -616,8 +694,9 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
         else:
             markup = types.ReplyKeyboardMarkup(True, True)
             cities = requests.get(
@@ -646,8 +725,9 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
             await message.answer(title, reply_markup=markup)
 
         elif message.text == 'Назад':
@@ -656,16 +736,17 @@ async def main():
             search = types.KeyboardButton('Поиск 🔍')
             game = types.KeyboardButton('Игры 🎲')
             setting = types.KeyboardButton('Профиль 🤖')
+            setIdols = types.KeyboardButton('Выбрать кумиров ⭐')
             title = 'Привет!☺️  \nВыбери, что тебя интересует?👇'
-            markup.add(search, game, setting)
+            markup.add(search, game, setting, setIdols)
             await message.answer(title, reply_markup=markup)
         else:
             data.append(message.text)
-            await message.answer('Успешно добавлено, чтобы применить изменения нажмите - Сохранить список (если меню скрыто, нажмите «значек»)')
+            await botInit.send_photo(message.chat.id, 'https://telegramexpert.ru/media/push/2021-08-28_21.39.48.jpg', caption='Успешно добавлено, чтобы применить изменения нажмите - Сохранить список (если меню скрыто, нажмите «значек»)')
 
     @bot.message_handler(content_types=["location"])
     async def loc_handler(message):
-        await message.answer('Извини, тебе придется подождать 20-30 секунд.\nМне надо время чтобы найти для тебя подходящие мероприятия 🤓')
+        await message.answer('Мне нужно подумать секунд 15 и я найду ближайшие к тебе мероприятия🤔')
         resp = requests.get('https://telegramexpert.ru/api/post/coord/{0}/{1}'.format(
             message.location.latitude, message.location.longitude)).json()
         title = f'<b>Ближайшие мероприятия (можешь сразу открыть несколько постов):</b> \n'

@@ -202,7 +202,7 @@ class PostsCoord(generics.ListAPIView):
 
     def get(self, request, la, lo):
         userData = (la, lo)
-        data = Posts.objects.all()
+        data = Posts.objects.filter(paid=True)
         coordData = []
         finalData = []
         for i in range(0, len(data)):
